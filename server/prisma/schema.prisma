@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StudentStatus {
+  draft
+  submitted
+  under_review
+  approved
+  rejected
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id               String    @id @default(uuid())
+  roleId           String
+  role             Role      @relation(fields: [roleId], references: [id])
+  email            String    @unique
+  passwordHash     String
+  firstName        String?
+  lastName         String?
+  phone            String?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  lastLoginAt      DateTime?
+  studentProfile   StudentProfile?
+  uploadedDocuments Document[] @relation("uploadedByUser")
+  verifiedDocuments Document[] @relation("verifiedByUser")
+  auditLogs        AuditLog[]
+}
+
+model Department {
+  id         String    @id @default(uuid())
+  name       String
+  code       String    @unique
+  createdAt  DateTime  @default(now())
+  programmes Programme[]
+}
+
+model Programme {
+  id             String     @id @default(uuid())
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id])
+  name           String
+  code           String     @unique
+  durationMonths Int?
+  createdAt      DateTime   @default(now())
+  students       StudentProfile[]
+}
+
+model StudentProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  programmeId   String?
+  programme     Programme? @relation(fields: [programmeId], references: [id])
+  studentNumber String?    @unique
+  dob           DateTime?
+  gender        String?
+  nationality   String?
+  address       String?
+  contactPhone  String?
+  bio           Json?
+  status        StudentStatus @default(draft)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  documents     Document[]
+  nextOfKin     NextOfKin[]
+}
+
+model NextOfKin {
+  id         String   @id @default(uuid())
+  studentId  String
+  student    StudentProfile @relation(fields: [studentId], references: [id])
+  fullName   String
+  relationship String?
+  phone      String?
+  address    String?
+  createdAt  DateTime @default(now())
+}
+
+model Document {
+  id              String   @id @default(uuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id])
+  uploadedBy      String?
+  uploadedByUser  User?    @relation("uploadedByUser", fields: [uploadedBy], references: [id])
+  fileUrl         String
+  fileName        String?
+  fileType        String?
+  sizeBytes       Int?
+  verified        Boolean  @default(false)
+  verifiedBy      String?
+  verifiedByUser  User?    @relation("verifiedByUser", fields: [verifiedBy], references: [id])
+  uploadedAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String?
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
