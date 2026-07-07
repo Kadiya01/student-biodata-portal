@@ -1,4 +1,4 @@
-# ERD
+ # ERD
 
 See `database/schema/001_schema.sql` for table definitions. The key relationships:
 

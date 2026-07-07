@@ -36,3 +36,11 @@ export async function loginUser(email: string, password: string) {
   const token = signToken({ userId: user.id, role: user.role?.name || 'student', email: user.email });
   return { user, token };
 }
+
+export async function getUserById(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true, studentProfile: true } });
+  if (!user) return null;
+  // Remove sensitive fields
+  const { passwordHash, ...rest } = user as any;
+  return rest;
+}

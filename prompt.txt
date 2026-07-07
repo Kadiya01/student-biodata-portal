@@ -1,0 +1,781 @@
+Below is a **master frontend prompt** optimized for AI website builders like **Antigravity**, **Lovable**, **Bolt.new**, **v0**, or similar tools. It is written as a product requirements document (PRD), which generally produces better results than a short prompt.
+
+---
+
+# MASTER FRONTEND PROMPT
+
+## Project Title
+
+**Student Biodata Portal for Rauda College of Health Science and Technology**
+
+---
+
+## Role
+
+Act as a **Senior UI/UX Designer and Senior Frontend Engineer**.
+
+Design and build a **modern, responsive, production-ready frontend** for a **Student Biodata Portal**.
+
+This is **NOT** an admission portal.
+
+This is **NOT** a student management system.
+
+This is specifically a **Student Biodata Portal** where students complete their biodata after creating an account.
+
+Design it like a modern SaaS dashboard with clean UI, smooth animations, accessibility, and responsive layouts.
+
+---
+
+# Technology
+
+Use:
+
+* React
+* TypeScript
+* Tailwind CSS
+* React Router
+* Framer Motion
+* React Hook Form
+* Zod Validation
+* Lucide Icons
+
+The project must be fully responsive for:
+
+* Desktop
+* Tablet
+* Mobile
+
+---
+
+# Branding
+
+Institution:
+
+**Rauda College of Health Science and Technology**
+
+Theme:
+
+Modern Academic Institution
+
+Primary Color
+
+```
+#0F766E
+```
+
+Secondary Color
+
+```
+#14B8A6
+```
+
+Accent
+
+```
+#F59E0B
+```
+
+Background
+
+```
+#F8FAFC
+```
+
+Cards
+
+```
+White
+Rounded corners
+Soft shadows
+```
+
+Design inspiration:
+
+* Stripe Dashboard
+* Notion
+* Clerk
+* Linear
+* Vercel Dashboard
+
+---
+
+# User Roles
+
+Only three roles exist.
+
+## Student
+
+Can:
+
+* Register
+* Login
+* Complete biodata
+* Upload passport photograph
+* View submission status
+* Download biodata PDF
+
+---
+
+## Reviewer
+
+Can:
+
+* Login
+* View submissions
+* Search students
+* Review biodata
+* Approve
+* Reject
+* Add review comments
+* Export students (CSV and PDF)
+
+---
+
+## Super Admin
+
+Can:
+
+* Login
+* View dashboard
+* Receive notifications of newly registered students
+* View all submissions
+* Manage reviewer accounts
+* Generate reports
+
+Super Admin does NOT review biodata.
+
+---
+
+# Authentication Pages
+
+Create
+
+## Landing Page
+
+Contains
+
+* Hero section
+* College logo placeholder
+* Welcome text
+* Student Login
+* Student Register
+* Admin Login
+
+---
+
+## Student Registration
+
+Fields
+
+* Full Name
+* Email
+* Phone Number
+* Password
+* Confirm Password
+
+When registration succeeds
+
+Display
+
+```
+Registration Successful
+
+Registration Number:
+
+RCHST-2026-00001
+
+Please login to complete your biodata.
+```
+
+---
+
+## Student Login
+
+Simple login page.
+
+---
+
+## Admin Login
+
+Single login page.
+
+Backend decides whether the admin is:
+
+* Super Admin
+* Reviewer
+
+---
+
+# Student Dashboard
+
+Sidebar
+
+* Dashboard
+* Biodata
+* Submission Status
+* Download PDF
+* Logout
+
+Top Navbar
+
+* Student Name
+* Registration Number
+* Notification icon
+* Profile Photo
+
+Dashboard Cards
+
+* Registration Number
+* Biodata Status
+* Submission Status
+* Last Updated
+
+---
+
+# Biodata Form
+
+Use a modern multi-step wizard.
+
+Progress Bar
+
+```
+Step 1
+Personal Information
+
+↓
+
+Step 2
+Educational Information
+
+↓
+
+Step 3
+Guardian Information
+
+↓
+
+Step 4
+Review
+
+↓
+
+Submit
+```
+
+---
+
+# STEP 1
+
+Personal Information
+
+Fields
+
+* Passport Photo Upload
+* Full Name
+* Date of Birth
+* Gender
+
+Dropdown
+
+* Male
+* Female
+
+Email
+
+Phone Number
+
+Residential Address
+
+---
+
+# STEP 2
+
+Educational Information
+
+Fields
+
+Primary School Attended
+
+Secondary School Attended
+
+SSCE Type
+
+Dropdown
+
+* WAEC
+* NECO
+* NABTEB
+
+---
+
+# SSCE Subjects
+
+Display as table.
+
+Columns
+
+Subject
+
+Grade
+
+Default subjects
+
+* English Language
+* Mathematics
+
+Button
+
+```
+Add Subject
+```
+
+Subject dropdown
+
+Include
+
+* Biology
+* Chemistry
+* Physics
+* Geography
+* Economics
+* Agricultural Science
+* Government
+* Civic Education
+* Hausa
+* Computer Studies
+* Further Mathematics
+* Literature
+* CRS
+* IRS
+
+Grade dropdown
+
+```
+A1
+B2
+B3
+C4
+C5
+C6
+D7
+E8
+F9
+```
+
+Student can dynamically add more rows.
+
+---
+
+# Automatic Credit Counter
+
+Display live.
+
+Example
+
+```
+Credits Obtained
+
+5
+```
+
+Credit grades
+
+```
+A1
+
+B2
+
+B3
+
+C4
+
+C5
+
+C6
+```
+
+Non-credit
+
+```
+D7
+
+E8
+
+F9
+```
+
+---
+
+# Validation Rules
+
+Student CANNOT submit unless
+
+English Language
+
+≥ Credit
+
+AND
+
+Mathematics
+
+≥ Credit
+
+AND
+
+Minimum 5 Credits.
+
+Show live validation.
+
+Green
+
+```
+Eligible
+
+✔ You meet the minimum requirement.
+```
+
+Red
+
+```
+Not Eligible
+
+Minimum 5 credits required.
+
+English and Mathematics must both have credit passes.
+```
+
+Disable Submit button until validation passes.
+
+---
+
+# STEP 3
+
+Guardian Information
+
+Fields
+
+Guardian Full Name
+
+Guardian Address
+
+Guardian Phone Number
+
+Relationship
+
+Dropdown
+
+* Father
+* Mother
+* Brother
+* Sister
+* Uncle
+* Aunt
+* Guardian
+* Other
+
+---
+
+# STEP 4
+
+Review Page
+
+Display summary.
+
+Personal Information
+
+Educational Information
+
+Guardian Information
+
+Buttons
+
+Previous
+
+Submit Biodata
+
+---
+
+# Submission
+
+After submission
+
+Show
+
+```
+Congratulations!
+
+Your biodata has been submitted successfully.
+```
+
+Generate
+
+Registration Summary Card
+
+Show
+
+* Registration Number
+* Student Name
+* Submission Date
+* Current Status
+
+Status
+
+Submitted
+
+Buttons
+
+Download PDF
+
+Print
+
+Back to Dashboard
+
+---
+
+# Student Status Page
+
+Timeline
+
+```
+Draft
+
+↓
+
+Submitted
+
+↓
+
+Under Review
+
+↓
+
+Approved
+
+or
+
+Rejected
+```
+
+If rejected
+
+Display reviewer comment.
+
+---
+
+# Reviewer Dashboard
+
+Statistics Cards
+
+* Total Students
+* Pending Review
+* Approved
+* Rejected
+
+Search bar
+
+Student Table
+
+Columns
+
+Registration Number
+
+Student Name
+
+Programme
+
+Submission Date
+
+Status
+
+Actions
+
+View
+
+Approve
+
+Reject
+
+Export PDF
+
+---
+
+When reviewer opens student
+
+Show complete biodata.
+
+Buttons
+
+Approve
+
+Reject
+
+Comment Box
+
+Export PDF
+
+---
+
+# Reviewer Export
+
+Buttons
+
+Export CSV
+
+Export PDF
+
+Both should export filtered data.
+
+---
+
+# Super Admin Dashboard
+
+Cards
+
+* Total Students
+* New Registrations
+* Pending Reviews
+* Approved Records
+
+Notification Panel
+
+Example
+
+```
+New Student Registered
+
+Name:
+
+Amina Yusuf
+
+Registration Number:
+
+RCHST-2026-00045
+```
+
+Reviewer Management
+
+Table
+
+* Reviewer Name
+* Email
+* Status
+
+Buttons
+
+Add Reviewer
+
+Edit
+
+Deactivate
+
+---
+
+# Notifications
+
+Use toast notifications.
+
+Examples
+
+Registration Successful
+
+Saved Successfully
+
+Submission Successful
+
+Approved
+
+Rejected
+
+Export Completed
+
+---
+
+# Components
+
+Create reusable components.
+
+Examples
+
+* Button
+* Card
+* Input
+* Select
+* Table
+* Sidebar
+* Navbar
+* Badge
+* Modal
+* Stepper
+* Progress Bar
+* Toast
+* Avatar
+* File Upload
+* Empty State
+* Loading Spinner
+
+---
+
+# Accessibility
+
+Keyboard navigation
+
+ARIA labels
+
+Proper form validation
+
+Responsive layouts
+
+High color contrast
+
+---
+
+# Animations
+
+Use Framer Motion.
+
+Smooth page transitions.
+
+Animated cards.
+
+Hover effects.
+
+Loading skeletons.
+
+---
+
+# Mock Backend
+
+Use local JSON data and React Context/API abstraction so the frontend is ready to connect to a Flask REST API later without changing the UI.
+
+---
+
+# Code Quality
+
+* Modular folder structure
+* Reusable components
+* Clean TypeScript
+* No inline styles
+* Proper state management
+* Production-ready architecture
+
+---
+
+# Deliverables
+
+Generate:
+
+* Complete React + TypeScript project
+* Responsive UI
+* All pages
+* Routing
+* Reusable components
+* Mock data
+* Form validation
+* Dynamic SSCE credit calculation
+* Registration number generation (frontend mock)
+* PDF download UI integration
+* CSV export UI integration
+* Professional dashboard
+* Clean, maintainable code
+
+**Do not build the backend. Build only the complete frontend, using mocked services that can later be connected to a Flask API.**
