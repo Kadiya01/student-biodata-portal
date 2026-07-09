@@ -13,4 +13,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/prisma ./prisma
 EXPOSE 4000
-CMD ["node", "dist/server/src/index.js"]
+CMD ["node", "dist/src/index.js"]

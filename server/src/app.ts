@@ -10,6 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (_req, res) => res.send('Student Bio-Data API'));
+
 app.use('/api/v1', routes);
 
 // 404
@@ -17,7 +19,5 @@ app.use(notFound);
 
 // Error handler
 app.use(errorHandler);
-
-app.get('/', (_req, res) => res.send('Student Bio-Data API'));
 
 export default app;
