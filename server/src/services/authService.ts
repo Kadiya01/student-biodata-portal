@@ -52,6 +52,8 @@ export async function loginUser(email: string, password: string) {
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) throw new Error('Invalid credentials');
 
+  await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+
   const token = signToken({ userId: user.id, role: user.role.name, email: user.email });
   return { user: sanitizeUser(user), token };
 }

@@ -8,7 +8,7 @@ import { ApiAuthRepository } from './api/ApiAuthRepository';
 import { ApiStudentRepository } from './api/ApiStudentRepository';
 import { ApiAdminRepository } from './api/ApiAdminRepository';
 
-const useMock = (import.meta as any).env.VITE_USE_MOCK !== 'false';
+const useMock = (import.meta as any).env.VITE_USE_MOCK === 'true';
 
 export const authRepo: IAuthRepository = useMock ? new MockAuthRepository() : new ApiAuthRepository();
 export const studentRepo: IStudentRepository = useMock ? new MockStudentRepository() : new ApiStudentRepository();

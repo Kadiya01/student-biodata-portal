@@ -6,14 +6,18 @@ import documents from './documents';
 import audit from './audit';
 import users from './users';
 import notifications from './notifications';
+import passwordReset from './passwordReset';
+import programmes from './programmes';
 
 const router = Router();
 router.use('/health', health);
 router.use('/auth', auth);
+router.use('/auth', passwordReset);
 router.use('/students', students);
 router.use('/documents', documents);
 router.use('/audit', audit);
 router.use('/users', users);
 router.use('/notifications', notifications);
+router.use('/programmes', programmes);
 
 export default router;

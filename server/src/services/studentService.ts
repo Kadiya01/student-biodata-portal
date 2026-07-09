@@ -1,6 +1,6 @@
 import prisma from '../prismaClient';
 
-export async function listStudents(search?: string, status?: string) {
+export async function listStudents(search?: string, status?: string, limit = 50, offset = 0) {
   const where: any = {};
   if (status) where.status = status;
   if (search) {
@@ -10,11 +10,17 @@ export async function listStudents(search?: string, status?: string) {
       { user: { lastName: { contains: search } } },
     ];
   }
-  return prisma.studentProfile.findMany({
-    where,
-    include: { user: { include: { role: true } }, programme: true, documents: true },
-    orderBy: { updatedAt: 'desc' }
-  });
+  const [students, total] = await Promise.all([
+    prisma.studentProfile.findMany({
+      where,
+      include: { user: { include: { role: true } }, programme: true, documents: true },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.studentProfile.count({ where }),
+  ]);
+  return { students, total, limit, offset };
 }
 
 export async function getStudentById(id: string) {
