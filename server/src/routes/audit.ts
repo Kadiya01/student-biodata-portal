@@ -4,6 +4,6 @@ import { requireAuth, requireRole } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.get('/', requireAuth, requireRole('admin'), list);
+router.get('/', requireAuth, requireRole('super_admin', 'reviewer'), list);
 
 export default router;

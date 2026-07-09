@@ -823,7 +823,7 @@ export default function AdminDashboard() {
               type="email"
               value={reviewerForm.email}
               onChange={(e) => setReviewerForm({ ...reviewerForm, email: e.target.value })}
-              placeholder="e.g. reviewer@rauda.edu.ng"
+              placeholder="e.g. reviewer@college.edu.ng"
             />
 
             {!editingReviewer && (

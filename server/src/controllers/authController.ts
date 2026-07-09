@@ -4,10 +4,10 @@ import * as auditService from '../services/auditService';
 
 export async function register(req: Request, res: Response) {
   try {
-    const { user, token } = await authService.registerUser(req.body);
+    const { user, token, regNumber } = await authService.registerUser(req.body);
     // Audit log
-    await auditService.log({ userId: user.id, action: 'register', entityType: 'User', entityId: user.id, details: { email: user.email, firstName: user.firstName }, ipAddress: req.ip });
-    res.json({ user, token });
+    await auditService.log({ userId: user.id, action: 'register', entityType: 'User', entityId: user.id, details: { email: user.email, firstName: user.firstName, regNumber }, ipAddress: req.ip });
+    res.json({ user, token, regNumber });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

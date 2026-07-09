@@ -7,7 +7,7 @@ export async function generateRegistrationPDF(elementId: string, filename: strin
     // Fallback: generate a basic text PDF
     const doc = new jsPDF();
     doc.setFontSize(16);
-    doc.text('Rauda College of Health Science and Technology', 20, 20);
+    doc.text('College of Health Science and Technology', 20, 20);
     doc.setFontSize(12);
     doc.text('Registration Summary', 20, 30);
     doc.text('Could not generate detailed summary. Please use Print instead.', 20, 50);

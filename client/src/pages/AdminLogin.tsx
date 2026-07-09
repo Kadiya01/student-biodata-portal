@@ -75,7 +75,7 @@ export default function AdminLogin() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 label="Staff Email Address"
-                placeholder="staff@rauda.edu.ng"
+                placeholder="staff@college.edu.ng"
                 type="email"
                 leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
                 error={errors.email?.message}

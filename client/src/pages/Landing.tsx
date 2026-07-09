@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GraduationCap, ShieldAlert, ArrowRight, UserCheck, CheckCircle2 } from 'lucide-react';
+import { ShieldAlert, ArrowRight, UserCheck, CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
+import { AnimatedHeroGraphic } from '../components/ui/AnimatedHeroGraphic';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -11,15 +12,10 @@ export default function Landing() {
     <div className="min-h-[85vh] flex flex-col justify-center py-6 md:py-12">
       {/* Brand Header */}
       <div className="text-center space-y-4 max-w-4xl mx-auto">
-        <div className="inline-flex p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-2xl text-brand-primary animate-pulse">
-          <GraduationCap className="w-10 h-10" />
-        </div>
+        <AnimatedHeroGraphic />
         
         <h1 className="text-3xl md:text-5xl font-black text-slate-900 font-sans tracking-tight leading-tight">
-          Rauda College of Health <br className="hidden md:inline"/>
-          <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
-            Science and Technology
-          </span>
+          College of Health Science and Technology
         </h1>
         
         <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto font-medium">

@@ -1,14 +1,16 @@
 import bcrypt from 'bcrypt';
 import prisma from '../prismaClient';
 import { signToken } from '../utils/jwt';
+import { generateStudentNumber } from '../utils/regNumber';
 
-export async function registerUser({ email, password, firstName, lastName, phone }: any) {
+export async function registerUser({ email, password, firstName, lastName, phone, role: roleName }: any) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error('Email already in use');
 
-  let role = await prisma.role.findUnique({ where: { name: 'student' } });
+  const targetRole = roleName || 'student';
+  let role = await prisma.role.findUnique({ where: { name: targetRole } });
   if (!role) {
-    role = await prisma.role.create({ data: { name: 'student', description: 'Student role' } });
+    role = await prisma.role.create({ data: { name: targetRole, description: `${targetRole} role` } });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -19,28 +21,54 @@ export async function registerUser({ email, password, firstName, lastName, phone
       firstName,
       lastName,
       phone,
-      roleId: role.id
+      roleId: role.id,
     },
     include: { role: true }
   });
 
+  let regNumber: string | undefined;
+  if (targetRole === 'student') {
+    regNumber = await generateStudentNumber();
+    await prisma.studentProfile.create({
+      data: {
+        userId: user.id,
+        studentNumber: regNumber,
+        contactPhone: phone,
+        bio: { fullName: `${firstName || ''} ${lastName || ''}`.trim(), email },
+        status: 'draft',
+      }
+    });
+  }
+
   const token = signToken({ userId: user.id, role: user.role.name, email: user.email });
-  return { user, token };
+  return { user: sanitizeUser(user), token, regNumber };
 }
 
 export async function loginUser(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email }, include: { role: true } });
   if (!user) throw new Error('Invalid credentials');
+  if (!user.isActive) throw new Error('Account deactivated');
+
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) throw new Error('Invalid credentials');
-  const token = signToken({ userId: user.id, role: user.role?.name || 'student', email: user.email });
-  return { user, token };
+
+  const token = signToken({ userId: user.id, role: user.role.name, email: user.email });
+  return { user: sanitizeUser(user), token };
 }
 
 export async function getUserById(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true, studentProfile: true } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true, studentProfile: true }
+  });
   if (!user) return null;
-  // Remove sensitive fields
-  const { passwordHash, ...rest } = user as any;
-  return rest;
+  return sanitizeUser(user);
+}
+
+function sanitizeUser(user: any) {
+  const { passwordHash, role, ...rest } = user;
+  const flatRole = role?.name || 'student';
+  const studentNumber = rest.studentProfile?.studentNumber;
+  const status = rest.studentProfile?.status;
+  return { ...rest, role: flatRole, regNumber: studentNumber, status };
 }

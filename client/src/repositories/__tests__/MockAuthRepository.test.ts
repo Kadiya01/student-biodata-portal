@@ -61,6 +61,8 @@ describe('MockAuthRepository', () => {
   it('register creates a new user and submission', async () => {
     const result = await repo.register({
       fullName: 'New Student',
+      firstName: 'New',
+      lastName: 'Student',
       email: 'new@test.com',
       phone: '08012345678',
       password: 'password123',
@@ -73,6 +75,8 @@ describe('MockAuthRepository', () => {
   it('register throws for duplicate email', async () => {
     await expect(repo.register({
       fullName: 'Duplicate',
+      firstName: 'Duplicate',
+      lastName: 'User',
       email: 'student@test.com',
       phone: '08012345678',
     })).rejects.toThrow('Email already exists');

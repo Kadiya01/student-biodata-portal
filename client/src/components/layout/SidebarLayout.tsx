@@ -88,7 +88,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
           </div>
           <div>
             <h1 className="text-sm font-bold text-slate-800 font-sans leading-tight">
-              Rauda College
+              College
             </h1>
             <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
               Biodata Portal
@@ -170,7 +170,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h1 className="text-xs font-bold text-slate-800">Rauda College</h1>
+                    <h1 className="text-xs font-bold text-slate-800">College</h1>
                     <p className="text-[9px] text-slate-400 font-bold uppercase">Biodata</p>
                   </div>
                 </div>

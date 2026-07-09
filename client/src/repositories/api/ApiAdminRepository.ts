@@ -61,13 +61,13 @@ export class ApiAdminRepository implements IAdminRepository {
 
   async getNotifications(): Promise<{ notifications: any[] }> {
     setAuth();
-    const res = await api.get('/audit');
-    return { notifications: res.data.logs || [] };
+    const res = await api.get('/notifications');
+    return { notifications: res.data.notifications || [] };
   }
 
   async markNotificationRead(id: string): Promise<{ success: boolean }> {
     setAuth();
-    const res = await api.put(`/audit/${id}/read`);
+    const res = await api.put(`/notifications/${id}/read`);
     return { success: true };
   }
 }

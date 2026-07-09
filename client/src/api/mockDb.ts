@@ -65,7 +65,7 @@ export interface NotificationItem {
 const DEFAULT_USERS: User[] = [
   {
     id: 'u-student-1',
-    email: 'student@rauda.edu.ng',
+    email: 'student@college.edu.ng',
     firstName: 'Amina',
     lastName: 'Yusuf',
     role: 'student',
@@ -73,7 +73,7 @@ const DEFAULT_USERS: User[] = [
   },
   {
     id: 'u-reviewer-1',
-    email: 'reviewer@rauda.edu.ng',
+    email: 'reviewer@college.edu.ng',
     firstName: 'Jamilu',
     lastName: 'Bello',
     role: 'reviewer',
@@ -81,7 +81,7 @@ const DEFAULT_USERS: User[] = [
   },
   {
     id: 'u-admin-1',
-    email: 'admin@rauda.edu.ng',
+    email: 'admin@college.edu.ng',
     firstName: 'Prof. Ibrahim',
     lastName: 'Adamu',
     role: 'super_admin',
@@ -94,7 +94,7 @@ const DEFAULT_SUBMISSIONS: Submission[] = [
     studentId: 'u-student-1',
     regNumber: 'RCHST-2026-00045',
     fullName: 'Amina Yusuf',
-    email: 'student@rauda.edu.ng',
+    email: 'student@college.edu.ng',
     programme: 'Community Health Extension Worker (CHEW)',
     submissionDate: '2026-06-28T14:32:00+01:00',
     status: 'Submitted',
@@ -103,7 +103,7 @@ const DEFAULT_SUBMISSIONS: Submission[] = [
       fullName: 'Amina Yusuf',
       dob: '2004-05-12',
       gender: 'Female',
-      email: 'student@rauda.edu.ng',
+      email: 'student@college.edu.ng',
       phone: '08031234567',
       address: 'No 12, Gwarimpa Estate, Abuja',
       primarySchool: 'Model Primary School, Zaria',

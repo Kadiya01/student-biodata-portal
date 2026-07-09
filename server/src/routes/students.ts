@@ -6,12 +6,13 @@ import { studentUpsertSchema } from '../validation/student';
 
 const router = Router();
 
-router.get('/', requireAuth, requireRole('admin'), studentController.list);
+router.get('/', requireAuth, requireRole('reviewer', 'super_admin'), studentController.list);
 router.post('/', requireAuth, validate({ body: studentUpsertSchema }), studentController.upsert);
+router.get('/by-user/:userId', requireAuth, studentController.getByUser);
 router.get('/:id', requireAuth, studentController.get);
 router.put('/:id', requireAuth, validate({ body: studentUpsertSchema }), studentController.upsert);
-router.delete('/:id', requireAuth, requireRole('admin'), studentController.remove);
-router.put('/approve/:id', requireAuth, requireRole('registrar'), studentController.approve);
-router.put('/reject/:id', requireAuth, requireRole('registrar'), studentController.reject);
+router.delete('/:id', requireAuth, requireRole('super_admin'), studentController.remove);
+router.put('/approve/:id', requireAuth, requireRole('reviewer', 'super_admin'), studentController.approve);
+router.put('/reject/:id', requireAuth, requireRole('reviewer', 'super_admin'), studentController.reject);
 
 export default router;

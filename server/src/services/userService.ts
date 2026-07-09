@@ -7,7 +7,20 @@ export async function listUsers(role?: string) {
     include: { role: true },
     orderBy: { createdAt: 'desc' },
   });
-  return users.map(({ passwordHash, ...user }: { passwordHash?: string; [key: string]: any }) => user);
+  return users.map(({ passwordHash, role, ...user }: { passwordHash?: string; role?: any; [key: string]: any }) => ({
+    ...user,
+    role: role?.name || 'student'
+  }));
+}
+
+export async function getUserById(id: string) {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: { role: true }
+  });
+  if (!user) return null;
+  const { passwordHash, role, ...rest } = user as any;
+  return { ...rest, role: role?.name || 'student' };
 }
 
 export async function updateUser(id: string, data: { firstName?: string; lastName?: string; email?: string }) {
@@ -24,8 +37,18 @@ export async function updateUser(id: string, data: { firstName?: string; lastNam
     include: { role: true },
   });
 
-  const { passwordHash, ...rest } = updated as any;
-  return rest;
+  const { passwordHash, role, ...rest } = updated as any;
+  return { ...rest, role: role?.name || 'student' };
+}
+
+export async function getUserByEmail(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { role: true }
+  });
+  if (!user) return null;
+  const { passwordHash, role, ...rest } = user as any;
+  return { ...rest, role: role?.name || 'student' };
 }
 
 export async function toggleUserStatus(id: string) {
@@ -38,6 +61,6 @@ export async function toggleUserStatus(id: string) {
     include: { role: true },
   });
 
-  const { passwordHash, ...rest } = updated as any;
-  return rest;
+  const { passwordHash, role, ...rest } = updated as any;
+  return { ...rest, role: role?.name || 'student' };
 }

@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const studentUpsertSchema = z.object({
-  userId: z.string().uuid(),
-  programmeId: z.string().uuid().optional(),
+  userId: z.string(),
+  programmeId: z.string().optional(),
   studentNumber: z.string().optional(),
   dob: z.string().optional(),
   gender: z.string().optional(),

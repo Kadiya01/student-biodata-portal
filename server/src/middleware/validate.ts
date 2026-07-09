@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodTypeAny } from 'zod';
 
 type SchemaMap = {
-  body?: ZodTypeAny;
-  params?: ZodTypeAny;
-  query?: ZodTypeAny;
+  body?: any;
+  params?: any;
+  query?: any;
 };
 
 export function validate(schemas: SchemaMap) {

@@ -79,7 +79,7 @@ export default function Login() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 label="Institution Email Address"
-                placeholder="student@rauda.edu.ng"
+                placeholder="student@college.edu.ng"
                 type="email"
                 leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
                 error={errors.email?.message}

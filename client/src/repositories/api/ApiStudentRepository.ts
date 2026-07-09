@@ -32,14 +32,23 @@ export class ApiStudentRepository implements IStudentRepository {
       err.response = { status: 401, data: { message: 'Unauthorized' } };
       throw err;
     }
-    const res = await api.get(`/students/${userId}`);
-    return { biodata: res.data.student, submission: res.data.student };
+    const res = await api.get(`/students/by-user/${userId}`);
+    const student = res.data.student;
+    return {
+      biodata: student?.bio || null,
+      submission: student || null,
+    };
   }
 
   async saveBiodata(payload: SaveBiodataPayload): Promise<{ submission: any }> {
     setAuth();
     const userId = getUserIdFromToken();
-    const data = { ...payload.biodata, userId };
+    const isSubmitting = payload.action === 'submit';
+    const data = {
+      ...payload.biodata,
+      userId,
+      status: isSubmitting ? 'submitted' : 'draft',
+    };
     const res = await api.post('/students', data);
     return { submission: res.data.profile };
   }

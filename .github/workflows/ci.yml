@@ -11,12 +11,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - name: Install server dependencies
         working-directory: server
         run: npm ci
+      - name: Prisma generate
+        working-directory: server
+        run: npx prisma generate
+      - name: Build server
+        working-directory: server
+        run: npm run build
+      - name: Run server tests
+        working-directory: server
+        run: npm test
+
       - name: Install client dependencies
         working-directory: client
         run: npm ci
+      - name: TypeScript check client
+        working-directory: client
+        run: npx tsc --noEmit
       - name: Run client tests
         working-directory: client
         run: npm test

@@ -39,6 +39,7 @@ model User {
   uploadedDocuments Document[] @relation("uploadedByUser")
   verifiedDocuments Document[] @relation("verifiedByUser")
   auditLogs        AuditLog[]
+  notifications    Notification[]
 }
 
 model Department {
@@ -61,23 +62,26 @@ model Programme {
 }
 
 model StudentProfile {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  programmeId   String?
-  programme     Programme? @relation(fields: [programmeId], references: [id])
-  studentNumber String?    @unique
-  dob           DateTime?
-  gender        String?
-  nationality   String?
-  address       String?
-  contactPhone  String?
-  bio           Json?
-  status        StudentStatus @default(draft)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  documents     Document[]
-  nextOfKin     NextOfKin[]
+  id               String         @id @default(uuid())
+  userId           String         @unique
+  user             User           @relation(fields: [userId], references: [id])
+  programmeId      String?
+  programme        Programme?     @relation(fields: [programmeId], references: [id])
+  studentNumber    String?        @unique
+  dob              DateTime?
+  gender           String?
+  nationality      String?
+  address          String?
+  contactPhone     String?
+  bio              Json?
+  status           StudentStatus  @default(draft)
+  reviewerComments String?
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  documents        Document[]
+  nextOfKin        NextOfKin[]
 }
 
 model NextOfKin {
@@ -88,6 +92,17 @@ model NextOfKin {
   relationship String?
   phone      String?
   address    String?
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  studentId  String?
+  title      String
+  message    String
+  read       Boolean  @default(false)
   createdAt  DateTime @default(now())
 }
 

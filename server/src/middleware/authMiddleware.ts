@@ -15,11 +15,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export function requireRole(role: string) {
+export function requireRole(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
     if (!user) return res.status(403).json({ error: 'Forbidden' });
-    if (user.role !== role && user.role !== 'admin') return res.status(403).json({ error: 'Insufficient role' });
+    if (!roles.includes(user.role)) return res.status(403).json({ error: 'Insufficient role' });
     next();
   };
 }
