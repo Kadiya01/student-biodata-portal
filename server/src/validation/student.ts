@@ -9,5 +9,6 @@ export const studentUpsertSchema = z.object({
   nationality: z.string().optional(),
   address: z.string().optional(),
   contactPhone: z.string().optional(),
+  status: z.enum(['draft', 'submitted', 'under_review', 'approved', 'rejected']).optional(),
   bio: z.any().optional()
-});
+}).passthrough();

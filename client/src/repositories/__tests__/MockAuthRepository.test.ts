@@ -79,6 +79,7 @@ describe('MockAuthRepository', () => {
       lastName: 'User',
       email: 'student@test.com',
       phone: '08012345678',
+      password: 'password123',
     })).rejects.toThrow('Email already exists');
   });
 

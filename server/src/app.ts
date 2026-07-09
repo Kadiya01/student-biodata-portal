@@ -7,8 +7,18 @@ import { notFound, errorHandler } from './middleware/errorHandler';
 dotenv.config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+  credentials: true,
+}));
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/', (_req, res) => res.send('Student Bio-Data API'));
 

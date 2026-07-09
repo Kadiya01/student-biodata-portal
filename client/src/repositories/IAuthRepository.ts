@@ -6,7 +6,7 @@ export interface RegisterPayload {
   lastName: string;
   email: string;
   phone: string;
-  password?: string;
+  password: string;
 }
 
 export interface AuthResult {

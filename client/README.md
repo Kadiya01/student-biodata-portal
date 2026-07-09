@@ -85,15 +85,15 @@ The backend determines whether an admin user is a Reviewer or Super Admin. The f
 
 ---
 
-## Test Credentials (Mock Seeded Data)
+## Test Credentials
 
 | Role | Email | Password |
 |---|---|---|
-| Student | `student@rauda.edu.ng` | *(any text)* |
-| Reviewer | `reviewer@rauda.edu.ng` | *(any text)* |
-| Super Admin | `admin@rauda.edu.ng` | *(any text)* |
+| Student | `student@college.edu.ng` | `password123` |
+| Reviewer | `reviewer@college.edu.ng` | `password123` |
+| Super Admin | `admin@college.edu.ng` | `password123` |
 
-> The mock API accepts any password for seeded accounts. For newly self-registered students, whatever password they enter at registration is accepted.
+> Mock mode accepts any password. Production mode requires the passwords listed above.
 
 ---
 
