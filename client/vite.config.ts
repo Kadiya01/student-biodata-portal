@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    hmr: { host: 'localhost', protocol: 'ws' },
     proxy: {
       // Proxy API requests to backend during development
       '/api': {
