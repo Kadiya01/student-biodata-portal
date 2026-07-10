@@ -38,9 +38,9 @@ const authLimiter = rateLimit({
 
 app.get('/', (_req, res) => res.send('Student Bio-Data API'));
 
-app.use('/api/v1', routes);
 app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
+app.use('/api/v1', routes);
 
 app.use(notFound);
 app.use(errorHandler);

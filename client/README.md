@@ -165,7 +165,7 @@ Custom Tailwind tokens are defined in `tailwind.config.cjs` under `theme.extend.
 
 The `client/src/api/api.ts` file overrides Axios's `get`, `post`, and `put` methods to intercept all API calls and resolve them against the LocalStorage mock database (`mockDb.ts`) with a simulated 400–500ms delay.
 
-All API routes follow the same URL patterns that the real Flask backend will expose:
+All API routes follow the same URL patterns that the real Express backend implements:
 
 | Method | URL | Description |
 |---|---|---|
@@ -185,16 +185,26 @@ All API routes follow the same URL patterns that the real Flask backend will exp
 
 ---
 
-## Connecting to the Real Flask Backend
+## Connecting to the Real Backend
 
-When the Flask API is ready:
+When the Express API is ready:
 
-1. **Delete** the `api.get = async function...`, `api.post = async function...`, and `api.put = async function...` override blocks in [`src/api/api.ts`](./src/api/api.ts)
-2. Create a `.env` file in the `client/` directory:
+1. Create a `.env` file in the `client/` directory:
    ```
    VITE_API_URL=http://localhost:5000/api/v1
+   VITE_USE_MOCK=false
    ```
-3. The Axios instance will take over automatically — no changes needed to any pages or components.
+2. Start the backend and frontend:
+   ```powershell
+   cd server
+   npm install
+   npm run dev
+   
+   cd ../client
+   npm install
+   npm run dev
+   ```
+3. The frontend will use the shared Axios instance in `client/src/api/api.ts` and send requests to the backend automatically.
 
 ---
 
@@ -202,7 +212,7 @@ When the Flask API is ready:
 
 | Variable | Default | Description |
 |---|---|---|
-| `VITE_API_URL` | `/api/v1` | Base URL for the Flask REST API |
+| `VITE_API_URL` | `/api/v1` | Base URL for the backend REST API |
 
 ---
 
@@ -212,4 +222,4 @@ When the Flask API is ready:
 npm run build
 ```
 
-Output is written to `client/dist/`. Serve via any static file host or configure Nginx/Flask to serve `dist/index.html` for all routes.
+Output is written to `client/dist/`. Serve via any static file host or configure your backend to serve `dist/index.html` for all routes.

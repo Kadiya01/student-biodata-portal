@@ -1,16 +1,5 @@
-import axios from 'axios';
+import api from '../../api/api';
 import { IStudentRepository, SaveBiodataPayload } from '../IStudentRepository';
-
-const api = axios.create({
-  baseURL: (import.meta as any).env.VITE_API_URL || '/api/v1',
-});
-
-function setAuth() {
-  const token = localStorage.getItem('token');
-  if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-}
 
 function getUserIdFromToken(): string | null {
   const token = localStorage.getItem('token');
@@ -25,7 +14,6 @@ function getUserIdFromToken(): string | null {
 
 export class ApiStudentRepository implements IStudentRepository {
   async getBiodata(): Promise<{ biodata: any; submission: any }> {
-    setAuth();
     const userId = getUserIdFromToken();
     if (!userId) {
       const err: any = new Error('Unauthorized');
@@ -41,7 +29,6 @@ export class ApiStudentRepository implements IStudentRepository {
   }
 
   async saveBiodata(payload: SaveBiodataPayload): Promise<{ submission: any }> {
-    setAuth();
     const userId = getUserIdFromToken();
     const isSubmitting = payload.action === 'submit';
     const data = {
