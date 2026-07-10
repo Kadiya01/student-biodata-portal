@@ -72,17 +72,17 @@ describe('MockStudentRepository', () => {
   it('saveBiodata saves draft successfully', async () => {
     localStorage.setItem('token', 'student@test.com');
     const result = await repo.saveBiodata({
-      biodata: { firstName: 'Updated' },
+      biodata: { fullName: 'Updated' },
       action: 'save',
     });
     expect(result.submission.status).toBe('Draft');
-    expect(result.submission.biodata.firstName).toBe('Updated');
+    expect(result.submission.biodata.fullName).toBe('Updated');
   });
 
   it('saveBiodata submits successfully', async () => {
     localStorage.setItem('token', 'student@test.com');
     const result = await repo.saveBiodata({
-      biodata: { firstName: 'Final' },
+      biodata: { fullName: 'Final' },
       action: 'submit',
     });
     expect(result.submission.status).toBe('Submitted');
