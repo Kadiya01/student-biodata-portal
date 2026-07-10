@@ -13,7 +13,7 @@ describe('Students routes', () => {
   test('GET /api/v1/students (reviewer)', async () => {
     const reviewerToken = signToken({ userId: 'reviewer-1', role: 'reviewer', email: 'reviewer@example.com' });
     const students = [{ id: 's1', studentNumber: '100' }];
-    jest.spyOn(studentService, 'listStudents').mockResolvedValue(students as any);
+    jest.spyOn(studentService, 'listStudents').mockResolvedValue({ students, total: 1, limit: 50, offset: 0 } as any);
     const res = await request(app).get('/api/v1/students').set('Authorization', `Bearer ${reviewerToken}`).expect(200);
     expect(res.body.students).toBeDefined();
     expect(Array.isArray(res.body.students)).toBe(true);

@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import prisma from '../prismaClient';
 import { signToken } from '../utils/jwt';
 import { generateStudentNumber } from '../utils/regNumber';
+import * as refreshTokenService from './refreshTokenService';
 
 export async function registerUser({ email, password, firstName, lastName, phone, role: roleName }: any) {
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -41,7 +42,8 @@ export async function registerUser({ email, password, firstName, lastName, phone
   }
 
   const token = signToken({ userId: user.id, role: user.role.name, email: user.email });
-  return { user: sanitizeUser(user), token, regNumber };
+  const refreshToken = await refreshTokenService.createRefreshToken(user.id);
+  return { user: sanitizeUser(user), token, refreshToken, regNumber };
 }
 
 export async function loginUser(email: string, password: string) {
@@ -55,7 +57,27 @@ export async function loginUser(email: string, password: string) {
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
 
   const token = signToken({ userId: user.id, role: user.role.name, email: user.email });
-  return { user: sanitizeUser(user), token };
+  const refreshToken = await refreshTokenService.createRefreshToken(user.id);
+  return { user: sanitizeUser(user), token, refreshToken };
+}
+
+export async function refreshAccessToken(refreshToken: string) {
+  const payload = await refreshTokenService.verifyRefreshToken(refreshToken);
+  if (!payload) throw new Error('Invalid or expired refresh token');
+
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    include: { role: true },
+  });
+  if (!user) throw new Error('User not found');
+  if (!user.isActive) throw new Error('Account deactivated');
+
+  const newAccessToken = signToken({ userId: user.id, role: user.role.name, email: user.email });
+  return { token: newAccessToken, user: sanitizeUser(user) };
+}
+
+export async function logoutUser(refreshToken: string) {
+  await refreshTokenService.revokeRefreshToken(refreshToken);
 }
 
 export async function getUserById(userId: string) {

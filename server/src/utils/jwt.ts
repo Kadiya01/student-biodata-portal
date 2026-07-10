@@ -1,10 +1,16 @@
 import jwt from 'jsonwebtoken';
 import config from '../config';
 
-export function signToken(payload: object, expiresIn = '1h') {
-  return jwt.sign(payload, config.jwtSecret, { expiresIn });
+export interface JwtPayload {
+  userId: string;
+  role: string;
+  email: string;
 }
 
-export function verifyToken(token: string) {
-  return jwt.verify(token, config.jwtSecret);
+export function signToken(payload: JwtPayload, expiresIn = '1h') {
+  return jwt.sign(payload, config.jwtSecret, { algorithm: 'HS256', expiresIn });
+}
+
+export function verifyToken(token: string): JwtPayload {
+  return jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] }) as JwtPayload;
 }

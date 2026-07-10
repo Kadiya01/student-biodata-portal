@@ -36,7 +36,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
     try {
       const res = await adminRepo.getNotifications();
       setNotifications(res.notifications);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Failed to fetch notifications');
+    }
   };
 
   useEffect(() => {
@@ -50,7 +52,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
     try {
       await adminRepo.markNotificationRead(id);
       fetchNotifications();
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Failed to mark notification as read');
+    }
   };
 
   const handleLogout = () => {

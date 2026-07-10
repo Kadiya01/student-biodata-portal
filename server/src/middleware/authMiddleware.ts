@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt';
+import { verifyToken, JwtPayload } from '../utils/jwt';
+
+export interface AuthenticatedRequest extends Request {
+  user?: JwtPayload;
+}
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const auth = req.headers.authorization;
@@ -7,8 +11,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const parts = auth.split(' ');
   if (parts.length !== 2 || parts[0] !== 'Bearer') return res.status(401).json({ error: 'Invalid authorization format' });
   try {
-    const payload: any = verifyToken(parts[1]) as any;
-    (req as any).user = payload;
+    const payload = verifyToken(parts[1]);
+    (req as AuthenticatedRequest).user = payload;
     return next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid token' });
@@ -17,7 +21,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 export function requireRole(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
+    const user = (req as AuthenticatedRequest).user;
     if (!user) return res.status(403).json({ error: 'Forbidden' });
     if (!roles.includes(user.role)) return res.status(403).json({ error: 'Insufficient role' });
     next();

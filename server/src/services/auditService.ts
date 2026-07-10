@@ -1,4 +1,5 @@
 import prisma from '../prismaClient';
+import logger from '../utils/logger';
 
 export async function log({ userId, action, entityType, entityId, details, ipAddress }: any) {
   try {
@@ -13,9 +14,7 @@ export async function log({ userId, action, entityType, entityId, details, ipAdd
       }
     });
   } catch (err) {
-    // Swallow errors to avoid interfering with main flow; logs can be inspected separately.
-    // eslint-disable-next-line no-console
-    console.error('Failed to write audit log', err);
+    logger.error('Failed to write audit log', { error: err });
   }
 }
 

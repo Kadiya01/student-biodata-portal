@@ -145,8 +145,6 @@ export default function BiodataWizard() {
     name: 'step2.ssceSubjects',
   });
 
-  const [draftLoadError, setDraftLoadError] = useState(false);
-
   // Load existing draft if present
   useEffect(() => {
     const loadDraft = async () => {
@@ -185,7 +183,7 @@ export default function BiodataWizard() {
           }
         }
       } catch (err) {
-        setDraftLoadError(true);
+        // Draft load failed — form will start with default values
       }
     };
     loadDraft();
@@ -249,7 +247,9 @@ export default function BiodataWizard() {
           isEligible,
         };
         await studentRepo.saveBiodata({ biodata: formattedBiodata, action: 'save' });
-      } catch (e) {}
+      } catch (e) {
+        toast.error('Failed to auto-save draft. Your changes may not be saved.');
+      }
       
       setCurrentStep((prev) => prev + 1);
     } else {
@@ -304,7 +304,7 @@ export default function BiodataWizard() {
       setCurrentStep(4); // Show success receipt
       await refreshUser();
     } catch (err) {
-      // Errors handled by AuthContext toast notification
+      toast.error('Failed to submit biodata. Please try again.');
     } finally {
       setLoading(false);
     }
