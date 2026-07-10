@@ -13,7 +13,7 @@ export async function listStudents(search?: string, status?: string, limit = 50,
   const [students, total] = await Promise.all([
     prisma.studentProfile.findMany({
       where,
-      include: { user: { include: { role: true } }, programme: true, documents: true },
+      include: { user: { include: { role: true } }, programme: true, _count: { select: { documents: true } } },
       orderBy: { updatedAt: 'desc' },
       take: limit,
       skip: offset,

@@ -35,3 +35,7 @@ services:
         value: production
       - key: PORT
         value: 4000
+      - key: DATABASE_POOL_SIZE
+        value: 20
+      - key: DATABASE_POOL_TIMEOUT
+        value: 30

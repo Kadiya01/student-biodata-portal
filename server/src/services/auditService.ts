@@ -23,12 +23,15 @@ export async function listLogs({ limit = 50, offset = 0, userId, action, entityT
   if (userId) where.userId = userId;
   if (action) where.action = action;
   if (entityType) where.entityType = entityType;
-  const logs = await prisma.auditLog.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    skip: offset,
-    take: limit,
-    include: { user: true }
-  });
-  return logs;
+  const [logs, total] = await Promise.all([
+    prisma.auditLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: offset,
+      take: limit,
+      include: { user: true },
+    }),
+    prisma.auditLog.count({ where }),
+  ]);
+  return { logs, total, limit, offset };
 }

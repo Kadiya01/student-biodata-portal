@@ -1,16 +1,24 @@
 import prisma from '../prismaClient';
 
-export async function listUsers(role?: string) {
+export async function listUsers(role?: string, limit = 50, offset = 0) {
   const where = role ? { role: { name: role } } : {};
-  const users = await prisma.user.findMany({
-    where,
-    include: { role: true },
-    orderBy: { createdAt: 'desc' },
-  });
-  return users.map(({ passwordHash, role, ...user }: { passwordHash?: string; role?: any; [key: string]: any }) => ({
-    ...user,
-    role: role?.name || 'student'
-  }));
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      include: { role: true },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.user.count({ where }),
+  ]);
+  return {
+    users: users.map(({ passwordHash, role, ...user }: { passwordHash?: string; role?: any; [key: string]: any }) => ({
+      ...user,
+      role: role?.name || 'student'
+    })),
+    total,
+  };
 }
 
 export async function getUserById(id: string) {

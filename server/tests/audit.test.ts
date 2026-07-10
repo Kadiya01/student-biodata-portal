@@ -13,8 +13,8 @@ describe('Audit routes', () => {
 
   test('GET /api/v1/audit returns logs for reviewer', async () => {
     const token = signToken({ userId: 'r1', role: 'reviewer', email: 'r@test.com' });
-    const logs = [{ id: 'a1', action: 'approve_student' }];
-    jest.spyOn(auditService, 'listLogs').mockResolvedValue(logs as any);
+    const result = { logs: [{ id: 'a1', action: 'approve_student' }], total: 1, limit: 50, offset: 0 };
+    jest.spyOn(auditService, 'listLogs').mockResolvedValue(result as any);
 
     const res = await request(app)
       .get('/api/v1/audit')
@@ -23,11 +23,12 @@ describe('Audit routes', () => {
 
     expect(res.body.logs).toBeDefined();
     expect(Array.isArray(res.body.logs)).toBe(true);
+    expect(res.body.total).toBe(1);
   });
 
   test('GET /api/v1/audit returns logs for super_admin', async () => {
     const token = signToken({ userId: 'admin1', role: 'super_admin', email: 'admin@test.com' });
-    jest.spyOn(auditService, 'listLogs').mockResolvedValue([{ id: 'a2' }] as any);
+    jest.spyOn(auditService, 'listLogs').mockResolvedValue({ logs: [{ id: 'a2' }], total: 1 } as any);
 
     const res = await request(app)
       .get('/api/v1/audit')
@@ -35,6 +36,7 @@ describe('Audit routes', () => {
       .expect(200);
 
     expect(res.body.logs).toHaveLength(1);
+    expect(res.body.total).toBe(1);
   });
 
   test('GET /api/v1/audit returns 403 for student', async () => {

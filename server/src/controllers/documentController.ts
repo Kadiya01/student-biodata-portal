@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import * as auditService from '../services/auditService';
-import { catchAsync } from '../middleware/catchAsync';
+import { catchAsync, parsePagination } from '../middleware/catchAsync';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { isCloudinaryConfigured, uploadToCloudinary } from '../config/cloudinary';
 import logger from '../utils/logger';
@@ -52,6 +52,15 @@ export const upload = catchAsync(async (req: AuthenticatedRequest, res: Response
 
 export const listByStudent = catchAsync(async (req: Request, res: Response) => {
   const studentId = req.params.studentId;
-  const docs = await prisma.document.findMany({ where: { studentId } });
-  res.json({ docs });
+  const { limit, offset } = parsePagination(req.query);
+  const [docs, total] = await Promise.all([
+    prisma.document.findMany({
+      where: { studentId },
+      take: limit,
+      skip: offset,
+      orderBy: { uploadedAt: 'desc' },
+    }),
+    prisma.document.count({ where: { studentId } }),
+  ]);
+  res.json({ docs, total, limit, offset });
 });

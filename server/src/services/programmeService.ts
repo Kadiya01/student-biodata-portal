@@ -1,13 +1,21 @@
 import prisma from '../prismaClient';
+import { cacheGet, cacheSet } from '../config/cache';
 
 export async function listProgrammes(departmentId?: string) {
+  const cacheKey = `programmes:${departmentId || 'all'}`;
+  const cached = await cacheGet<any[]>(cacheKey);
+  if (cached) return cached;
+
   const where: any = {};
   if (departmentId) where.departmentId = departmentId;
-  return prisma.programme.findMany({
+  const data = await prisma.programme.findMany({
     where,
     include: { department: true },
     orderBy: { name: 'asc' },
   });
+
+  await cacheSet(cacheKey, data, 300);
+  return data;
 }
 
 export async function getProgramme(id: string) {
@@ -30,5 +38,12 @@ export async function deleteProgramme(id: string) {
 }
 
 export async function listDepartments() {
-  return prisma.department.findMany({ orderBy: { name: 'asc' } });
+  const cacheKey = 'departments:all';
+  const cached = await cacheGet<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const data = await prisma.department.findMany({ orderBy: { name: 'asc' } });
+
+  await cacheSet(cacheKey, data, 300);
+  return data;
 }

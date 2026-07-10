@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import dotenv from 'dotenv';
 import routes from './routes';
 import { notFound, errorHandler } from './middleware/errorHandler';
@@ -16,6 +16,8 @@ dotenv.config();
 initSentry();
 
 const app = express();
+
+app.set('trust proxy', 1);
 
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
@@ -46,14 +48,45 @@ app.use(express.json({ limit: '10mb' }));
 app.use(sanitize);
 app.use(requestLogger);
 
+function keyGenerator(req: express.Request): string {
+  return (req as any).user?.userId || ipKeyGenerator(req.ip || 'anonymous');
+}
+
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   message: { error: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
 });
 app.use(globalLimiter);
+
+const readLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator,
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator,
+});
+
+app.use((req, res, next) => {
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    readLimiter(req, res, next);
+  } else {
+    writeLimiter(req, res, next);
+  }
+});
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -84,6 +117,8 @@ app.get('/metrics', (_req, res) => {
 
 app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
+app.use('/api/v1/auth/forgot-password', authLimiter);
+app.use('/api/v1/auth/reset-password', authLimiter);
 app.use('/api/v1', routes);
 
 app.use(notFound);

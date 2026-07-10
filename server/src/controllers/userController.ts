@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/userService';
-import { catchAsync } from '../middleware/catchAsync';
+import { catchAsync, parsePagination } from '../middleware/catchAsync';
 
 export const list = catchAsync(async (req: Request, res: Response) => {
   const { role } = req.query;
-  const users = await userService.listUsers(role as string | undefined);
-  res.json({ users });
+  const { limit, offset } = parsePagination(req.query);
+  const result = await userService.listUsers(role as string | undefined, limit, offset);
+  res.json(result);
 });
 
 export const update = catchAsync(async (req: Request, res: Response) => {

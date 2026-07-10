@@ -12,8 +12,8 @@ describe('Users routes', () => {
 
   test('GET /api/v1/users lists users for super_admin', async () => {
     const token = signToken({ userId: 'admin1', role: 'super_admin', email: 'admin@test.com' });
-    const users = [{ id: 'u1', email: 'test@test.com', role: 'reviewer' }];
-    jest.spyOn(userService, 'listUsers').mockResolvedValue(users as any);
+    const result = { users: [{ id: 'u1', email: 'test@test.com', role: 'reviewer' }], total: 1 };
+    jest.spyOn(userService, 'listUsers').mockResolvedValue(result as any);
 
     const res = await request(app)
       .get('/api/v1/users')
@@ -22,6 +22,7 @@ describe('Users routes', () => {
 
     expect(res.body.users).toBeDefined();
     expect(Array.isArray(res.body.users)).toBe(true);
+    expect(res.body.total).toBe(1);
   });
 
   test('PUT /api/v1/users/:id updates a user for super_admin', async () => {
@@ -64,7 +65,7 @@ describe('Users routes', () => {
 
   test('GET /api/v1/users returns 403 for reviewer', async () => {
     const token = signToken({ userId: 'r1', role: 'reviewer', email: 'r@test.com' });
-    jest.spyOn(userService, 'listUsers').mockResolvedValue([] as any);
+    jest.spyOn(userService, 'listUsers').mockResolvedValue({ users: [], total: 0 } as any);
 
     const res = await request(app)
       .get('/api/v1/users')

@@ -18,6 +18,7 @@ jest.mock('../src/prismaClient', () => {
         sizeBytes: 1024,
       }),
       findMany: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
     },
   };
   return { __esModule: true, default: mockPrisma };
