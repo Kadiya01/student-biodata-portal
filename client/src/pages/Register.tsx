@@ -114,6 +114,7 @@ export default function Register() {
                       label="Student Full Name"
                       placeholder="e.g. Amina Yusuf"
                       type="text"
+                      autoComplete="name"
                       leftIcon={<User className="w-4 h-4 text-slate-400" />}
                       error={errors.fullName?.message}
                       disabled={loading}
@@ -124,6 +125,7 @@ export default function Register() {
                       label="Email Address"
                       placeholder="e.g. amina@example.com"
                       type="email"
+                      autoComplete="email"
                       leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
                       error={errors.email?.message}
                       disabled={loading}
@@ -134,6 +136,7 @@ export default function Register() {
                       label="Phone Number"
                       placeholder="e.g. 08012345678"
                       type="tel"
+                      autoComplete="tel"
                       leftIcon={<Phone className="w-4 h-4 text-slate-400" />}
                       error={errors.phone?.message}
                       disabled={loading}
@@ -145,6 +148,7 @@ export default function Register() {
                         label="Password"
                         placeholder="••••••••"
                         type="password"
+                        autoComplete="new-password"
                         leftIcon={<Lock className="w-4 h-4 text-slate-400" />}
                         error={errors.password?.message}
                         disabled={loading}
@@ -155,6 +159,7 @@ export default function Register() {
                         label="Confirm Password"
                         placeholder="••••••••"
                         type="password"
+                        autoComplete="new-password"
                         leftIcon={<Lock className="w-4 h-4 text-slate-400" />}
                         error={errors.confirmPassword?.message}
                         disabled={loading}

@@ -62,8 +62,12 @@ export async function cacheSet(key: string, value: unknown, ttl = 300): Promise<
 export async function cacheDel(pattern: string): Promise<void> {
   if (!redisAvailable || !redis) return;
   try {
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) await redis.del(...keys);
+    let cursor = '0';
+    do {
+      const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+      if (keys.length > 0) await redis.del(...keys);
+    } while (cursor !== '0');
   } catch {
     // silently fail
   }

@@ -27,10 +27,23 @@ Set these in the Render dashboard under Environment:
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | Neon PostgreSQL connection string |
+| `DATABASE_POOL_SIZE` | Connection pool size (default: `20`) |
+| `DATABASE_POOL_TIMEOUT` | Pool timeout in seconds (default: `30`) |
 | `JWT_SECRET` | 64+ character random string. Generate: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
 | `CLIENT_URL` | Your Vercel frontend URL (e.g., `https://your-app.vercel.app`) |
 | `NODE_ENV` | `production` |
 | `PORT` | `4000` |
+| `SMTP_HOST` | SMTP server host (e.g., `smtp.gmail.com`) |
+| `SMTP_PORT` | SMTP port (default: `587`) |
+| `SMTP_USER` | SMTP username |
+| `SMTP_PASS` | SMTP password |
+| `SMTP_FROM` | From address (e.g., `noreply@yourdomain.com`) |
+| `SMTP_FROM_NAME` | From name (e.g., `Student Portal`) |
+| `REDIS_HOST` | Upstash Redis host (for BullMQ jobs + caching) |
+| `REDIS_PORT` | Redis port (default: `6379`) |
+| `REDIS_PASSWORD` | Redis password |
+| `SENTRY_DSN` | Sentry DSN for error monitoring (optional) |
+| `CLOUDINARY_URL` | Cloudinary URL for file storage (optional) |
 
 ### 2.2 Deploy
 1. Push code to GitHub
@@ -43,12 +56,14 @@ Set these in the Render dashboard under Environment:
      ```
    - **Start Command:**
      ```
-     cd server && node dist/src/index.js
+     cd server && npm run start:prod
      ```
    - **Environment:** Node
-   - **Region:** Frankfurt (eu-central-1)
+   - **Region:** Frankfurt (eu-central-1) or closest to your users
 5. Add environment variables
 6. Deploy
+
+The `render.yaml` in the root configures this automatically if you use Render's Blueprint feature.
 
 ### 2.3 Post-Deploy
 After first deploy, run the seed script in the Render shell:
@@ -89,7 +104,7 @@ Set in Vercel dashboard:
 ```json
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://student-biodata-api.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://your-render-url.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
@@ -103,14 +118,17 @@ All `/api/*` requests are proxied to the Render backend.
 After deployment, verify:
 
 - [ ] Backend health check: `GET /api/v1/health` returns 200
-- [ ] Student registration works
-- [ ] Student login works
+- [ ] Student registration works (returns 201)
+- [ ] Student login works (returns token + refreshToken)
+- [ ] Refresh token rotation works (old token revoked, new one issued)
 - [ ] Biodata wizard saves and submits
 - [ ] Reviewer login and dashboard loads
 - [ ] Approve/reject flow works
 - [ ] Notifications appear on actions
 - [ ] Audit log records events
-- [ ] CSV/PDF export works
+- [ ] Password reset email sends (if SMTP configured)
+- [ ] PDF download works
+- [ ] Rate limiting blocks rapid requests (429 response)
 - [ ] Mobile responsive layout
 
 ---
@@ -148,9 +166,19 @@ npm run dev
 ```powershell
 cd client
 npm install
-# Create .env with VITE_API_URL and VITE_USE_MOCK
 npm run dev
-# Frontend runs at http://localhost:5173
+# Frontend runs at http://localhost:5173 (mock mode by default)
+```
+
+### Running Tests
+```powershell
+# Server tests (9 suites, 60 tests)
+cd server
+npm test
+
+# Client tests (16 suites, 100 tests)
+cd client
+npm run test
 ```
 
 ### Full Stack

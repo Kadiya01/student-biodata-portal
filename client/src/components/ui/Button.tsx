@@ -40,9 +40,12 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-5 py-3 text-base gap-2.5',
   };
 
+  const isDisabled = disabled || isLoading;
+
   return (
     <button
-      disabled={disabled || isLoading}
+      disabled={isDisabled}
+      aria-busy={isLoading || undefined}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >

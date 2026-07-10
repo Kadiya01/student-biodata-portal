@@ -9,12 +9,20 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Content-Type:** `application/json` for all requests except file uploads.
 
+**Rate Limits:**
+| Tier | Limit | Applied To |
+|------|-------|-----------|
+| Global | 200 requests / 15 min | All endpoints |
+| Read | 60 requests / min | GET endpoints |
+| Write | 20 requests / min | POST/PUT/DELETE endpoints |
+| Auth | 10 requests / 15 min | Login, register, refresh |
+
 ---
 
 ## Auth Routes
 
 ### POST `/auth/register`
-Register a new student account.
+Register a new student account. **Only `student` role accepted** — privilege escalation prevented.
 
 **Body:**
 ```json
@@ -27,11 +35,12 @@ Register a new student account.
 }
 ```
 
-**Response (200):**
+**Response (201):**
 ```json
 {
   "user": { "id": "...", "email": "...", "role": "student", "regNumber": "RCHST-2026-00001" },
   "token": "eyJ...",
+  "refreshToken": "abc123...",
   "regNumber": "RCHST-2026-00001"
 }
 ```
@@ -45,9 +54,29 @@ Login with email and password.
 
 **Body:** `{ "email": "...", "password": "..." }`
 
-**Response (200):** `{ "user": {...}, "token": "eyJ..." }`
+**Response (200):** `{ "user": {...}, "token": "eyJ...", "refreshToken": "..." }`
 
 **Rate Limit:** 10 attempts per 15 minutes.
+
+---
+
+### POST `/auth/refresh`
+Refresh an expired access token. Old refresh token is revoked; new one issued.
+
+**Body:** `{ "refreshToken": "..." }`
+
+**Response (200):** `{ "token": "eyJ...", "refreshToken": "...", "user": {...} }`
+
+**Error (401):** `{ "error": "Invalid or expired refresh token" }`
+
+---
+
+### POST `/auth/logout`
+Revoke a refresh token.
+
+**Body:** `{ "refreshToken": "..." }`
+
+**Response (200):** `{ "success": true }`
 
 ---
 
@@ -61,7 +90,7 @@ Get the currently authenticated user.
 ---
 
 ### POST `/auth/forgot-password`
-Request a password reset token.
+Request a password reset token (sent via email if SMTP configured).
 
 **Body:** `{ "email": "user@example.com" }`
 
@@ -76,7 +105,7 @@ Reset password with a valid token.
 
 **Response (200):** `{ "message": "Password reset successful" }`
 
-**Error (500):** `{ "error": "Invalid or expired token" }`
+**Error (400):** `{ "error": "Invalid or expired token" }`
 
 ---
 
@@ -85,7 +114,7 @@ Reset password with a valid token.
 ### GET `/students`
 List all students. **Reviewer/Super Admin only.**
 
-**Query Params:** `search`, `status`, `limit` (default 50), `offset` (default 0)
+**Query Params:** `search` (case-insensitive), `status`, `limit` (default 50), `offset` (default 0)
 
 **Response (200):**
 ```json
@@ -100,9 +129,12 @@ List all students. **Reviewer/Super Admin only.**
 ---
 
 ### POST `/students`
-Create or update a student profile. **Student only.**
+Create or update a student profile.
 
-**Body:** Biodata JSON with fields from the wizard (step1, step2, step3 merged).
+- **Student:** Can only upsert their own profile (IDOR protected).
+- **Reviewer/Admin:** Can upsert any student's profile.
+
+**Body:** Biodata JSON with fields from the wizard.
 
 **Response (200):** `{ "profile": {...} }`
 
@@ -134,16 +166,25 @@ Reject a student submission. **Reviewer/Super Admin only.**
 ---
 
 ### DELETE `/students/:id`
-Delete a student profile. **Super Admin only.**
+Delete a student profile and all related data (documents, next of kin). **Super Admin only.**
+
+Uses `$transaction` cascade delete — no FK constraint violations.
 
 **Response (200):** `{ "success": true }`
+
+---
+
+### GET `/students/:id/pdf`
+Generate and download a student biodata PDF.
+
+**Response:** PDF file (application/pdf)
 
 ---
 
 ## Document Routes
 
 ### POST `/documents/upload`
-Upload a document (multipart/form-data).
+Upload a document (multipart/form-data). Supports Cloudinary (production) or local storage (fallback).
 
 **Fields:** `file` (file), `studentId` (UUID string)
 
@@ -154,25 +195,43 @@ Upload a document (multipart/form-data).
 ---
 
 ### GET `/documents/:studentId`
-List documents for a student.
+List documents for a student. Paginated.
 
-**Response (200):** `{ "docs": [...] }`
+**Query Params:** `limit` (default 50), `offset` (default 0)
+
+**Response (200):**
+```json
+{
+  "docs": [...],
+  "total": 5,
+  "limit": 50,
+  "offset": 0
+}
+```
 
 ---
 
-## User Routes (Super Admin)
+## User Routes
 
 ### GET `/users`
 List all users. **Reviewer/Super Admin.**
 
-**Query Params:** `role` (optional filter)
+**Query Params:** `role` (optional filter), `limit` (default 50), `offset` (default 0)
 
-**Response (200):** `{ "users": [...] }`
+**Response (200):**
+```json
+{
+  "users": [...],
+  "total": 10
+}
+```
 
 ---
 
 ### PUT `/users/:id`
 Update a user. **Super Admin only.**
+
+Returns 409 if email is already taken by another user.
 
 **Body:** `{ "firstName": "...", "lastName": "...", "email": "..." }`
 
@@ -217,14 +276,22 @@ List audit logs. **Reviewer/Super Admin.**
 
 **Query Params:** `limit` (default 50), `offset` (default 0), `userId`, `action`, `entityType`
 
-**Response (200):** `{ "logs": [...] }`
+**Response (200):**
+```json
+{
+  "logs": [...],
+  "total": 100,
+  "limit": 50,
+  "offset": 0
+}
+```
 
 ---
 
 ## Programme Routes
 
 ### GET `/programmes`
-List all programmes.
+List all programmes. Cached in Redis (5-min TTL).
 
 **Query Params:** `departmentId` (optional filter)
 
@@ -233,7 +300,7 @@ List all programmes.
 ---
 
 ### GET `/programmes/departments`
-List all departments.
+List all departments. Cached in Redis (5-min TTL).
 
 **Response (200):** `{ "departments": [...] }`
 
@@ -248,6 +315,8 @@ Get a single programme by ID.
 
 ### POST `/programmes`
 Create a programme. **Super Admin only.**
+
+Cache invalidated on create/update/delete.
 
 **Body:** `{ "name": "...", "code": "...", "departmentId": "...", "durationMonths": 48 }`
 
@@ -276,6 +345,13 @@ Returns server status.
 
 ---
 
+## Metrics
+
+### GET `/metrics`
+Returns server health metrics. **Super Admin only.**
+
+---
+
 ## Error Responses
 
 All errors follow this format:
@@ -289,4 +365,6 @@ All errors follow this format:
 | 401 | Missing or invalid token |
 | 403 | Insufficient role |
 | 404 | Resource not found |
+| 409 | Conflict (e.g., duplicate email) |
+| 429 | Rate limit exceeded |
 | 500 | Internal server error (message hidden in production) |

@@ -75,22 +75,29 @@ The system enables students to register, complete a multi-step biodata form, and
 ## 3. Non-Functional Requirements
 
 ### 3.1 Performance
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| NFR-01 | Page load time < 3 seconds on 3G connection | High |
-| NFR-02 | API response time < 500ms for read operations | Medium |
-| NFR-03 | Support 100 concurrent users | Medium |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| NFR-01 | Page load time < 3 seconds on 3G connection | High | Implemented |
+| NFR-02 | API response time < 500ms for read operations | Medium | Implemented (Redis cache) |
+| NFR-03 | Support 500+ concurrent users | High | Implemented (connection pooling, tiered rate limiting, pagination) |
 
 ### 3.2 Security
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| NFR-10 | Passwords hashed with bcrypt (10 rounds) | High |
-| NFR-11 | JWT secrets must be 32+ characters, cryptographically random | High |
-| NFR-12 | Input sanitization (XSS protection) | High |
-| NFR-13 | CORS restricted to known origins | High |
-| NFR-14 | HTTPS in production | High |
-| NFR-15 | File upload type and size validation | High |
-| NFR-16 | Error messages do not leak internals in production | High |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| NFR-10 | Passwords hashed with bcrypt (10 rounds) | High | Implemented |
+| NFR-11 | JWT secrets must be 32+ characters, cryptographically random | High | Implemented (validated at startup) |
+| NFR-12 | Input sanitization (XSS protection) | High | Implemented (HTML entity decoding + tag/attribute/protocol stripping) |
+| NFR-13 | CORS restricted to known origins | High | Implemented |
+| NFR-14 | HTTPS in production | High | Implemented (Render provides) |
+| NFR-15 | File upload type and size validation | High | Implemented |
+| NFR-16 | Error messages do not leak internals in production | High | Implemented |
+| NFR-17 | Refresh tokens hashed at rest (SHA-256) | High | Implemented |
+| NFR-18 | TOCTOU-safe refresh token rotation | High | Implemented (atomic transaction) |
+| NFR-19 | Tiered rate limiting (global/read/write/auth) | High | Implemented |
+| NFR-20 | Privilege escalation prevention on registration | High | Implemented (role restricted to student) |
+| NFR-21 | IDOR protection on student profile updates | High | Implemented |
+| NFR-22 | Audit logging for all significant actions | High | Implemented |
+| NFR-23 | Metrics endpoint protected (super_admin only) | Medium | Implemented |
 
 ### 3.3 Usability
 | ID | Requirement | Priority |
@@ -142,9 +149,12 @@ The system enables students to register, complete a multi-step biodata form, and
 
 ## 6. Constraints & Assumptions
 
-- PostgreSQL database via Neon (serverless, connection pooling)
+- PostgreSQL database via Neon (serverless, connection pooling with configurable pool size)
 - Frontend deployed on Vercel (static SPA)
 - Backend deployed on Render.com (Docker, Node.js 18)
-- File storage: local multer (dev), Cloudinary (planned for production)
-- No email service currently — password reset tokens returned in API response
-- Single-server deployment (no horizontal scaling)
+- File storage: Cloudinary (production), Multer (local fallback)
+- Email: Nodemailer SMTP (optional, falls back to console logging)
+- Background jobs: BullMQ + Redis (optional, gracefully degrades when unavailable)
+- Caching: Redis with SCAN-based invalidation and 5-min TTL
+- Monitoring: Sentry error tracking (optional)
+- Single-server deployment with connection pooling for horizontal readiness

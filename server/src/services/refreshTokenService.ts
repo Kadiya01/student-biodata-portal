@@ -3,19 +3,25 @@ import prisma from '../prismaClient';
 
 const REFRESH_TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
 export async function createRefreshToken(userId: string): Promise<string> {
   const token = crypto.randomBytes(40).toString('hex');
+  const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
   await prisma.refreshToken.create({
-    data: { userId, token, expiresAt },
+    data: { userId, tokenHash, expiresAt },
   });
 
   return token;
 }
 
 export async function verifyRefreshToken(token: string): Promise<{ userId: string } | null> {
-  const record = await prisma.refreshToken.findUnique({ where: { token } });
+  const tokenHash = hashToken(token);
+  const record = await prisma.refreshToken.findUnique({ where: { tokenHash } });
   if (!record) return null;
   if (record.expiresAt < new Date()) {
     await prisma.refreshToken.delete({ where: { id: record.id } });
@@ -26,28 +32,41 @@ export async function verifyRefreshToken(token: string): Promise<{ userId: strin
 }
 
 export async function rotateRefreshToken(oldToken: string): Promise<{ userId: string; newToken: string } | null> {
-  const record = await prisma.refreshToken.findUnique({ where: { token: oldToken } });
-  if (!record) return null;
-  if (record.expiresAt < new Date()) {
-    await prisma.refreshToken.delete({ where: { id: record.id } });
-    return null;
-  }
-  if (record.revoked) return null;
+  const oldHash = hashToken(oldToken);
 
-  const newToken = crypto.randomBytes(40).toString('hex');
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+  const result = await prisma.$transaction(async (tx) => {
+    const record = await tx.refreshToken.findUnique({ where: { tokenHash: oldHash } });
+    if (!record) return null;
+    if (record.expiresAt < new Date()) {
+      await tx.refreshToken.delete({ where: { id: record.id } });
+      return null;
+    }
+    if (record.revoked) return null;
 
-  await prisma.$transaction([
-    prisma.refreshToken.update({ where: { id: record.id }, data: { revoked: true } }),
-    prisma.refreshToken.create({ data: { userId: record.userId, token: newToken, expiresAt } }),
-  ]);
+    const newToken = crypto.randomBytes(40).toString('hex');
+    const newHash = hashToken(newToken);
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
-  return { userId: record.userId, newToken };
+    const revoked = await tx.refreshToken.updateMany({
+      where: { id: record.id, revoked: false },
+      data: { revoked: true },
+    });
+    if (revoked.count === 0) return null;
+
+    await tx.refreshToken.create({
+      data: { userId: record.userId, tokenHash: newHash, expiresAt },
+    });
+
+    return { userId: record.userId, newToken };
+  });
+
+  return result;
 }
 
 export async function revokeRefreshToken(token: string): Promise<void> {
+  const tokenHash = hashToken(token);
   await prisma.refreshToken.updateMany({
-    where: { token },
+    where: { tokenHash },
     data: { revoked: true },
   });
 }

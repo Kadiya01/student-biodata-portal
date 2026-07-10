@@ -81,6 +81,7 @@ export default function Login() {
                 label="Institution Email Address"
                 placeholder="student@college.edu.ng"
                 type="email"
+                autoComplete="email"
                 leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
                 error={errors.email?.message}
                 disabled={loading}
@@ -91,6 +92,7 @@ export default function Login() {
                 label="Portal Password"
                 placeholder="••••••••"
                 type="password"
+                autoComplete="current-password"
                 leftIcon={<Lock className="w-4 h-4 text-slate-400" />}
                 error={errors.password?.message}
                 disabled={loading}

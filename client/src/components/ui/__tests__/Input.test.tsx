@@ -25,4 +25,12 @@ describe('Input', () => {
     render(<Input disabled />);
     expect(screen.getByRole('textbox')).toBeDisabled();
   });
+
+  it('exposes accessibility state when an error is present', () => {
+    render(<Input label="Email" error="Email is required" />);
+    const input = screen.getByLabelText('Email');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby');
+    expect(screen.getByText('Email is required')).toHaveAttribute('id');
+  });
 });

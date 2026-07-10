@@ -1,12 +1,34 @@
 import { Request, Response, NextFunction } from 'express';
 
+const HTML_ENTITY_RE = /&#?\w+;|&#x[\da-fA-F]+;/g;
+
+function decodeEntities(input: string): string {
+  return input.replace(HTML_ENTITY_RE, (match) => {
+    try {
+      if (match.startsWith('&#x') || match.startsWith('&#X')) {
+        return String.fromCharCode(parseInt(match.slice(3, -1), 16));
+      }
+      if (match.startsWith('&#')) {
+        return String.fromCharCode(parseInt(match.slice(2, -1), 10));
+      }
+      return match;
+    } catch {
+      return match;
+    }
+  });
+}
+
 function stripHtml(input: string): string {
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '')
-    .trim();
+  let s = decodeEntities(input);
+  s = s.replace(/<[^>]*>/g, '');
+  s = s.replace(/javascript\s*:/gi, '');
+  s = s.replace(/vbscript\s*:/gi, '');
+  s = s.replace(/data\s*:[^,]*;base64/gi, '');
+  s = s.replace(/\bon\w+\s*=\s*(['"])[^'"]*\1/gi, '');
+  s = s.replace(/\bon\w+\s*=\s*\S+/gi, '');
+  s = s.replace(/expression\s*\(/gi, '');
+  s = s.replace(/url\s*\(\s*['"]?\s*javascript/gi, '');
+  return s.trim();
 }
 
 function sanitizeValue(value: any): any {

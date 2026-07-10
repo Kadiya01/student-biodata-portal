@@ -10,7 +10,10 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, leftIcon, className = '', id, ...props }, ref) => {
     const inputId = id || React.useId();
-    
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
+    const describedBy = error ? errorId : helperText ? helperId : undefined;
+
     return (
       <div className="w-full flex flex-col gap-1.5">
         {label && (
@@ -27,6 +30,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            aria-invalid={error ? 'true' : undefined}
+            aria-errormessage={error ? errorId : undefined}
+            aria-describedby={describedBy}
             className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-slate-400
               ${leftIcon ? 'pl-11' : ''}
               ${
@@ -40,12 +46,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <span className="text-xs font-medium text-rose-500 mt-0.5">
+          <span id={errorId} role="alert" className="text-xs font-medium text-rose-500 mt-0.5">
             {error}
           </span>
         )}
         {!error && helperText && (
-          <span className="text-xs text-slate-400 mt-0.5">
+          <span id={helperId} className="text-xs text-slate-400 mt-0.5">
             {helperText}
           </span>
         )}
