@@ -18,8 +18,8 @@ export default function Landing() {
           College of Health Science and Technology
         </h1>
         
-        <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-          Welcome to the Student Biodata Portal. Register an account or log in to complete your academic biodata submission and print your official summary sheet.
+        <p className="text-base md:text-lg text-slate-500 max-w-xl mx-auto font-medium">
+          Complete your academic biodata registration, verify eligibility criteria, and print your official summary sheet.
         </p>
       </div>
 
@@ -34,7 +34,7 @@ export default function Landing() {
             
             <h2 className="text-xl font-bold text-slate-900">Student Portal</h2>
             <p className="text-sm text-slate-500 mt-2 flex-grow">
-              New student registration, biodata wizard filling (personal, educational, guardian), live credit requirements check, and registration summary PDF printing.
+              Register a new account, complete your biodata wizard, track review status, and download your registration slip.
             </p>
             
             <div className="mt-8 flex flex-wrap gap-3">
@@ -65,7 +65,7 @@ export default function Landing() {
             
             <h2 className="text-xl font-bold text-slate-900">Staff Portal</h2>
             <p className="text-sm text-slate-500 mt-2 flex-grow">
-              Staff access for Reviewers and Super Admins. Search & review student biodata, approve/reject submissions, log comments, export records, and manage reviewer accounts.
+              Review and approve submissions, manage reviewer accounts, and export official reports.
             </p>
             
             <div className="mt-8">

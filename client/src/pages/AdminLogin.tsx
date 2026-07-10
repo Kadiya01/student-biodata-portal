@@ -49,12 +49,14 @@ export default function AdminLogin() {
   return (
     <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8">
       {/* Back button */}
-      <Link
-        to="/"
-        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors mb-6 self-center md:absolute md:top-24 md:left-24"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Home
-      </Link>
+      <div className="w-full max-w-md mb-4 flex justify-start">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Link>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
