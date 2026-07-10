@@ -62,7 +62,7 @@ export async function loginUser(email: string, password: string) {
 }
 
 export async function refreshAccessToken(refreshToken: string) {
-  const payload = await refreshTokenService.verifyRefreshToken(refreshToken);
+  const payload = await refreshTokenService.rotateRefreshToken(refreshToken);
   if (!payload) throw new Error('Invalid or expired refresh token');
 
   const user = await prisma.user.findUnique({
@@ -73,7 +73,7 @@ export async function refreshAccessToken(refreshToken: string) {
   if (!user.isActive) throw new Error('Account deactivated');
 
   const newAccessToken = signToken({ userId: user.id, role: user.role.name, email: user.email });
-  return { token: newAccessToken, user: sanitizeUser(user) };
+  return { token: newAccessToken, refreshToken: payload.newToken, user: sanitizeUser(user) };
 }
 
 export async function logoutUser(refreshToken: string) {

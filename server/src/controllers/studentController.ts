@@ -3,9 +3,10 @@ import * as studentService from '../services/studentService';
 import * as auditService from '../services/auditService';
 import * as notificationService from '../services/notificationService';
 import { catchAsync, parsePagination } from '../middleware/catchAsync';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
 export const list = catchAsync(async (req: Request, res: Response) => {
-  const { search, status } = req.query as any;
+  const { search, status } = req.query as Record<string, string>;
   const { limit, offset } = parsePagination(req.query);
   const result = await studentService.listStudents(search, status, limit, offset);
   res.json(result);
@@ -23,11 +24,11 @@ export const getByUser = catchAsync(async (req: Request, res: Response) => {
   res.json({ student });
 });
 
-export const upsert = catchAsync(async (req: Request, res: Response) => {
+export const upsert = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const data = req.body;
   const profile = await studentService.createOrUpdateStudent(data);
   await auditService.log({
-    userId: (req as any).user?.userId || null,
+    userId: req.user?.userId || null,
     action: 'upsert_student_profile',
     entityType: 'StudentProfile',
     entityId: profile.id,
@@ -37,10 +38,10 @@ export const upsert = catchAsync(async (req: Request, res: Response) => {
   res.json({ profile });
 });
 
-export const remove = catchAsync(async (req: Request, res: Response) => {
+export const remove = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   await studentService.deleteStudent(req.params.id);
   await auditService.log({
-    userId: (req as any).user?.userId || null,
+    userId: req.user?.userId || null,
     action: 'delete_student_profile',
     entityType: 'StudentProfile',
     entityId: req.params.id,
@@ -50,14 +51,13 @@ export const remove = catchAsync(async (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
-export const approve = catchAsync(async (req: Request, res: Response) => {
+export const approve = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { reviewerComments } = req.body;
-  const reviewer = (req as any).user;
   const profile = await studentService.setStudentStatus(
-    req.params.id, 'approved', reviewerComments, reviewer?.userId
+    req.params.id, 'approved', reviewerComments, req.user?.userId
   );
   await auditService.log({
-    userId: reviewer?.userId || null,
+    userId: req.user?.userId || null,
     action: 'approve_student',
     entityType: 'StudentProfile',
     entityId: profile.id,
@@ -68,20 +68,19 @@ export const approve = catchAsync(async (req: Request, res: Response) => {
     await notificationService.createNotification({
       userId: profile.userId,
       title: 'Submission Approved',
-      message: `Your biodata submission has been approved.`
+      message: 'Your biodata submission has been approved.'
     });
   }
   res.json({ profile });
 });
 
-export const reject = catchAsync(async (req: Request, res: Response) => {
+export const reject = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { reviewerComments } = req.body;
-  const reviewer = (req as any).user;
   const profile = await studentService.setStudentStatus(
-    req.params.id, 'rejected', reviewerComments || '', reviewer?.userId
+    req.params.id, 'rejected', reviewerComments || '', req.user?.userId
   );
   await auditService.log({
-    userId: reviewer?.userId || null,
+    userId: req.user?.userId || null,
     action: 'reject_student',
     entityType: 'StudentProfile',
     entityId: profile.id,

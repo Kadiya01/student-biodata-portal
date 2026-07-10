@@ -41,6 +41,9 @@ model User {
   auditLogs        AuditLog[]
   notifications    Notification[]
   refreshTokens    RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([roleId])
 }
 
 model Department {
@@ -60,6 +63,8 @@ model Programme {
   durationMonths Int?
   createdAt      DateTime   @default(now())
   students       StudentProfile[]
+
+  @@index([departmentId])
 }
 
 model StudentProfile {
@@ -83,6 +88,10 @@ model StudentProfile {
   updatedAt        DateTime       @updatedAt
   documents        Document[]
   nextOfKin        NextOfKin[]
+
+  @@index([programmeId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model NextOfKin {
@@ -94,6 +103,8 @@ model NextOfKin {
   phone      String?
   address    String?
   createdAt  DateTime @default(now())
+
+  @@index([studentId])
 }
 
 model Notification {
@@ -105,6 +116,10 @@ model Notification {
   message    String
   read       Boolean  @default(false)
   createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
 }
 
 model Document {
@@ -121,6 +136,10 @@ model Document {
   verifiedBy      String?
   verifiedByUser  User?    @relation("verifiedByUser", fields: [verifiedBy], references: [id])
   uploadedAt      DateTime @default(now())
+
+  @@index([studentId])
+  @@index([uploadedBy])
+  @@index([verifiedBy])
 }
 
 model AuditLog {
@@ -133,6 +152,10 @@ model AuditLog {
   details    Json?
   ipAddress  String?
   createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 model RefreshToken {
@@ -143,4 +166,21 @@ model RefreshToken {
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token, used])
+  @@index([expiresAt])
 }

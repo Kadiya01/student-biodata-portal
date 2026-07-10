@@ -17,21 +17,43 @@ initSentry();
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "res.cloudinary.com"],
+      connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'none'"],
+    },
+  } : false,
+}));
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:5173',
   'http://localhost:3000',
-].filter(Boolean);
+].filter(Boolean) as string[];
 
 app.use(cors({
-  origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+  origin: allowedOrigins.length > 0 ? allowedOrigins : (process.env.NODE_ENV === 'production' ? false : '*'),
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(sanitize);
 app.use(requestLogger);
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

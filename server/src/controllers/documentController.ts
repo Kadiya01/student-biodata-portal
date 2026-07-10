@@ -2,17 +2,16 @@ import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import * as auditService from '../services/auditService';
 import { catchAsync } from '../middleware/catchAsync';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { isCloudinaryConfigured, uploadToCloudinary } from '../config/cloudinary';
 import logger from '../utils/logger';
 
-export const upload = catchAsync(async (req: Request, res: Response) => {
+export const upload = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const file = (req as any).file;
-  const user = (req as any).user;
   if (!file) return res.status(400).json({ error: 'No file uploaded' });
   const { studentId } = req.body;
 
   let fileUrl: string;
-  let publicId: string | null = null;
 
   if (isCloudinaryConfigured()) {
     try {
@@ -20,7 +19,6 @@ export const upload = catchAsync(async (req: Request, res: Response) => {
         folder: `student-biodata/${studentId}`,
       });
       fileUrl = result.url;
-      publicId = result.publicId;
     } catch (err) {
       logger.error('Cloudinary upload failed, falling back to local', { error: err });
       fileUrl = file.path || file.filename;
@@ -32,7 +30,7 @@ export const upload = catchAsync(async (req: Request, res: Response) => {
   const doc = await prisma.document.create({
     data: {
       studentId,
-      uploadedBy: user?.userId || null,
+      uploadedBy: req.user?.userId || null,
       fileUrl,
       fileName: file.originalname,
       fileType: file.mimetype,
@@ -41,7 +39,7 @@ export const upload = catchAsync(async (req: Request, res: Response) => {
   });
 
   await auditService.log({
-    userId: user?.userId || null,
+    userId: req.user?.userId || null,
     action: 'upload_document',
     entityType: 'Document',
     entityId: doc.id,

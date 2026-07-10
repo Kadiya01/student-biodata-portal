@@ -7,8 +7,8 @@ export interface JwtPayload {
   email: string;
 }
 
-export function signToken(payload: JwtPayload, expiresIn = '1h') {
-  return jwt.sign(payload, config.jwtSecret, { algorithm: 'HS256', expiresIn });
+export function signToken(payload: JwtPayload, expiresIn = '1h'): string {
+  return jwt.sign(payload, config.jwtSecret, { algorithm: 'HS256', expiresIn } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): JwtPayload {

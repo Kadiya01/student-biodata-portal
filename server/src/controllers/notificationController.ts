@@ -1,25 +1,23 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as notificationService from '../services/notificationService';
 import { catchAsync } from '../middleware/catchAsync';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
-export const list = catchAsync(async (req: Request, res: Response) => {
-  const user = (req as any).user;
-  const { limit = '50', offset = '0' } = req.query as any;
+export const list = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { limit = '50', offset = '0' } = req.query as Record<string, string>;
   const notifications = await notificationService.listNotifications(
-    user?.userId, Number(limit), Number(offset)
+    req.user!.userId, Number(limit), Number(offset)
   );
   res.json({ notifications });
 });
 
-export const markRead = catchAsync(async (req: Request, res: Response) => {
-  const user = (req as any).user;
+export const markRead = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  await notificationService.markAsRead(id, user?.userId);
+  await notificationService.markAsRead(id, req.user!.userId);
   res.json({ success: true });
 });
 
-export const markAllRead = catchAsync(async (req: Request, res: Response) => {
-  const user = (req as any).user;
-  await notificationService.markAllAsRead(user?.userId);
+export const markAllRead = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  await notificationService.markAllAsRead(req.user!.userId);
   res.json({ success: true });
 });
