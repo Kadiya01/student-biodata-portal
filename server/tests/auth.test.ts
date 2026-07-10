@@ -18,7 +18,7 @@ describe('Auth routes', () => {
     const token = signToken({ userId: user.id, role: user.role, email: user.email });
     jest.spyOn(authService, 'registerUser').mockResolvedValue({ user, token, regNumber: user.regNumber } as any);
 
-    const res = await request(app).post('/api/v1/auth/register').send({ email: user.email, password: 'Password123' }).expect(200);
+    const res = await request(app).post('/api/v1/auth/register').send({ email: user.email, password: 'Password123' }).expect(201);
     expect(res.body.user.email).toBe(user.email);
     expect(res.body.token).toBe(token);
     expect(res.body.regNumber).toBe(user.regNumber);

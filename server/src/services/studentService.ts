@@ -5,9 +5,9 @@ export async function listStudents(search?: string, status?: string, limit = 50,
   if (status) where.status = status;
   if (search) {
     where.OR = [
-      { studentNumber: { contains: search } },
-      { user: { firstName: { contains: search } } },
-      { user: { lastName: { contains: search } } },
+      { studentNumber: { contains: search, mode: 'insensitive' } },
+      { user: { firstName: { contains: search, mode: 'insensitive' } } },
+      { user: { lastName: { contains: search, mode: 'insensitive' } } },
     ];
   }
   const [students, total] = await Promise.all([
@@ -45,7 +45,6 @@ export async function createOrUpdateStudent(data: any) {
   if (profile.gender !== undefined) mapped.gender = profile.gender;
   if (profile.address !== undefined) mapped.address = profile.address;
   if (profile.contactPhone !== undefined) mapped.contactPhone = profile.contactPhone;
-  if (profile.phone !== undefined) mapped.contactPhone = profile.phone;
   if (profile.programmeId !== undefined) mapped.programmeId = profile.programmeId;
   if (profile.status !== undefined) mapped.status = profile.status;
   if (profile.reviewerComments !== undefined) mapped.reviewerComments = profile.reviewerComments;
@@ -67,7 +66,11 @@ export async function createOrUpdateStudent(data: any) {
 }
 
 export async function deleteStudent(id: string) {
-  return prisma.studentProfile.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.document.deleteMany({ where: { studentId: id } }),
+    prisma.nextOfKin.deleteMany({ where: { studentId: id } }),
+    prisma.studentProfile.delete({ where: { id } }),
+  ]);
 }
 
 export async function setStudentStatus(id: string, status: string, reviewerComments?: string, reviewedBy?: string) {

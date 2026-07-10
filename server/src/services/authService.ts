@@ -15,29 +15,32 @@ export async function registerUser({ email, password, firstName, lastName, phone
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      firstName,
-      lastName,
-      phone,
-      roleId: role.id,
-    },
-    include: { role: true }
-  });
-
+  let user: any;
   let regNumber: string | undefined;
+
   if (targetRole === 'student') {
     regNumber = await generateStudentNumber();
-    await prisma.studentProfile.create({
-      data: {
-        userId: user.id,
-        studentNumber: regNumber,
-        contactPhone: phone,
-        bio: { fullName: `${firstName || ''} ${lastName || ''}`.trim(), email },
-        status: 'draft',
-      }
+    const result = await prisma.$transaction(async (tx) => {
+      const u = await tx.user.create({
+        data: { email, passwordHash, firstName, lastName, phone, roleId: role.id },
+        include: { role: true },
+      });
+      await tx.studentProfile.create({
+        data: {
+          userId: u.id,
+          studentNumber: regNumber,
+          contactPhone: phone,
+          bio: { fullName: `${firstName || ''} ${lastName || ''}`.trim(), email },
+          status: 'draft',
+        },
+      });
+      return u;
+    });
+    user = result;
+  } else {
+    user = await prisma.user.create({
+      data: { email, passwordHash, firstName, lastName, phone, roleId: role.id },
+      include: { role: true },
     });
   }
 

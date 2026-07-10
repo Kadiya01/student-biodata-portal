@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 import logger from '../utils/logger';
 
-const REDIS_ENABLED = !!process.env.REDIS_HOST && process.env.REDIS_HOST !== '127.0.0.1';
+const REDIS_ENABLED = !!process.env.REDIS_HOST;
 
 let redis: Redis | null = null;
 let redisAvailable = false;
@@ -64,6 +64,15 @@ export async function cacheDel(pattern: string): Promise<void> {
   try {
     const keys = await redis.keys(pattern);
     if (keys.length > 0) await redis.del(...keys);
+  } catch {
+    // silently fail
+  }
+}
+
+export async function cacheDelExact(...keys: string[]): Promise<void> {
+  if (!redisAvailable || !redis || keys.length === 0) return;
+  try {
+    await redis.del(...keys);
   } catch {
     // silently fail
   }

@@ -7,7 +7,7 @@ export const registerSchema = z.object({
   lastName: z.string().optional(),
   fullName: z.string().optional(),
   phone: z.string().optional(),
-  role: z.string().optional()
+  role: z.enum(['student']).optional()
 });
 
 export const loginSchema = z.object({

@@ -26,6 +26,12 @@ export const getByUser = catchAsync(async (req: Request, res: Response) => {
 
 export const upsert = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const data = req.body;
+  if (!req.user?.userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.user.role === 'student') {
+    data.userId = req.user.userId;
+  } else if (!data.userId) {
+    data.userId = req.user.userId;
+  }
   const profile = await studentService.createOrUpdateStudent(data);
   await auditService.log({
     userId: req.user?.userId || null,
@@ -39,6 +45,8 @@ export const upsert = catchAsync(async (req: AuthenticatedRequest, res: Response
 });
 
 export const remove = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const student = await studentService.getStudentById(req.params.id);
+  if (!student) return res.status(404).json({ error: 'Student not found' });
   await studentService.deleteStudent(req.params.id);
   await auditService.log({
     userId: req.user?.userId || null,

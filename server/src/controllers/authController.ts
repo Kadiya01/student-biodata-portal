@@ -10,7 +10,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     userId: user.id, action: 'register', entityType: 'User', entityId: user.id,
     details: { email: user.email, firstName: user.firstName, regNumber }, ipAddress: req.ip
   });
-  res.json({ user, token, refreshToken, regNumber });
+  res.status(201).json({ user, token, refreshToken, regNumber });
 });
 
 export const login = catchAsync(async (req: Request, res: Response) => {

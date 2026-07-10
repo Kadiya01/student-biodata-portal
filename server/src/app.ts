@@ -7,6 +7,7 @@ import routes from './routes';
 import { notFound, errorHandler } from './middleware/errorHandler';
 import { sanitize } from './middleware/sanitize';
 import { requestLogger } from './middleware/requestLogger';
+import { requireAuth, requireRole } from './middleware/authMiddleware';
 import { initializeJobQueues } from './jobs';
 import { initSentry } from './config/sentry';
 import logger from './utils/logger';
@@ -106,7 +107,7 @@ app.use((_req, _res, next) => {
 
 app.get('/', (_req, res) => res.send('Student Bio-Data API'));
 
-app.get('/metrics', (_req, res) => {
+app.get('/metrics', requireAuth, requireRole('super_admin'), (_req, res) => {
   res.json({
     uptime: Math.floor((Date.now() - startTime) / 1000),
     requests: requestCount,
@@ -119,6 +120,7 @@ app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/auth/forgot-password', authLimiter);
 app.use('/api/v1/auth/reset-password', authLimiter);
+app.use('/api/v1/auth/refresh', authLimiter);
 app.use('/api/v1', routes);
 
 app.use(notFound);

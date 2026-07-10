@@ -1,5 +1,5 @@
 import prisma from '../prismaClient';
-import { cacheGet, cacheSet } from '../config/cache';
+import { cacheGet, cacheSet, cacheDel } from '../config/cache';
 
 export async function listProgrammes(departmentId?: string) {
   const cacheKey = `programmes:${departmentId || 'all'}`;
@@ -26,15 +26,21 @@ export async function getProgramme(id: string) {
 }
 
 export async function createProgramme(data: { name: string; code: string; departmentId?: string; durationMonths?: number }) {
-  return prisma.programme.create({ data, include: { department: true } });
+  const result = await prisma.programme.create({ data, include: { department: true } });
+  await cacheDel('programmes:*');
+  return result;
 }
 
 export async function updateProgramme(id: string, data: Partial<{ name: string; code: string; departmentId: string; durationMonths: number }>) {
-  return prisma.programme.update({ where: { id }, data, include: { department: true } });
+  const result = await prisma.programme.update({ where: { id }, data, include: { department: true } });
+  await cacheDel('programmes:*');
+  return result;
 }
 
 export async function deleteProgramme(id: string) {
-  return prisma.programme.delete({ where: { id } });
+  const result = await prisma.programme.delete({ where: { id } });
+  await cacheDel('programmes:*');
+  return result;
 }
 
 export async function listDepartments() {
