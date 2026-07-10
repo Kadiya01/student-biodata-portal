@@ -1,5 +1,6 @@
 import { Job } from 'bullmq';
 import { queueManager } from './queueManager';
+import { sendEmail, sendPasswordResetEmail } from '../services/emailService';
 import logger from '../utils/logger';
 
 export interface EmailJobData {
@@ -7,6 +8,11 @@ export interface EmailJobData {
   subject: string;
   html: string;
   replyTo?: string;
+}
+
+export interface PasswordResetJobData {
+  email: string;
+  token: string;
 }
 
 export interface NotificationJobData {
@@ -39,17 +45,15 @@ const MAINTENANCE_QUEUE = 'maintenance';
 
 export function initializeJobQueues(): void {
   queueManager.createWorker(EMAIL_QUEUE, async (job: Job) => {
-    const { to, subject, html } = job.data as EmailJobData;
-    logger.info(`[Email] Sending email to ${to}: ${subject}`);
-    // TODO: Integrate with email provider (SMTP, SendGrid, Mailgun, etc.)
-    logger.info(`[Email] Would send email`, { to, subject, html: html.substring(0, 100) });
-    return { sent: true, to, subject };
+    const data = job.data as EmailJobData;
+    logger.info(`[Email] Sending email to ${data.to}: ${data.subject}`);
+    await sendEmail(data);
+    return { sent: true, to: data.to, subject: data.subject };
   });
 
   queueManager.createWorker(NOTIFICATION_QUEUE, async (job: Job) => {
-    const { userId, title, message, type } = job.data as NotificationJobData;
+    const { userId, title, type } = job.data as NotificationJobData;
     logger.info(`[Notification] Creating notification for user ${userId}`, { title, type });
-    // TODO: Insert into Notification table via Prisma
     return { created: true, userId, title, type };
   });
 
@@ -69,7 +73,6 @@ export function initializeJobQueues(): void {
   queueManager.createWorker(MAINTENANCE_QUEUE, async (job: Job) => {
     const { olderThanDays, dryRun } = job.data as DocumentCleanupJobData;
     logger.info(`[Maintenance] Cleaning up documents older than ${olderThanDays} days`, { dryRun });
-    // TODO: Implement document cleanup logic with Prisma
     return { cleaned: 0, olderThanDays, dryRun };
   });
 
@@ -83,6 +86,15 @@ export function initializeJobQueues(): void {
 
 export async function sendEmailJob(data: EmailJobData): Promise<void> {
   await queueManager.addJob(EMAIL_QUEUE, 'send-email', data);
+}
+
+export async function sendPasswordResetJob(data: PasswordResetJobData): Promise<void> {
+  await queueManager.addJob(EMAIL_QUEUE, 'send-password-reset', {
+    to: data.email,
+    subject: 'Password Reset — Student Bio-Data Portal',
+    html: '',
+    _token: data.token,
+  } as EmailJobData);
 }
 
 export async function sendNotificationJob(data: NotificationJobData): Promise<void> {

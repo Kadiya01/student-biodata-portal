@@ -89,13 +89,9 @@ app.use('/api/v1', routes);
 app.use(notFound);
 app.use(errorHandler);
 
-if (process.env.REDIS_HOST || process.env.NODE_ENV === 'production') {
-  try {
-    initializeJobQueues();
-    logger.info('Background job queues started');
-  } catch (err) {
-    logger.error('Failed to initialize job queues', { error: err instanceof Error ? err.message : String(err) });
-  }
+// Initialize background job queues (graceful if Redis unavailable)
+if (process.env.NODE_ENV !== 'test') {
+  initializeJobQueues();
 }
 
 export default app;

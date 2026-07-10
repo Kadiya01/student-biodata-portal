@@ -29,6 +29,12 @@ Server runs at **http://localhost:4000**
 | `REDIS_PASSWORD` | No | Redis password (if required) |
 | `REDIS_DB` | No | Redis database number (default: `0`) |
 | `SENTRY_DSN` | No | Sentry DSN for error monitoring |
+| `SMTP_HOST` | No | SMTP server host for email sending |
+| `SMTP_PORT` | No | SMTP server port (default: `587`) |
+| `SMTP_USER` | No | SMTP username |
+| `SMTP_PASS` | No | SMTP password |
+| `SMTP_FROM` | No | From address for sent emails |
+| `SMTP_FROM_NAME` | No | From name for sent emails |
 
 Generate a JWT_SECRET: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
 
@@ -42,6 +48,7 @@ Generate a JWT_SECRET: `node -e "console.log(require('crypto').randomBytes(64).t
 | `npm test` | Run Jest tests |
 | `npm run seed` | Seed database with test data |
 | `npm run migrate` | Run Prisma migrations |
+| `npm run start:prod` | Run migrations then start server (production) |
 | `npm run prisma:generate` | Regenerate Prisma client |
 | `npm run lint` | Run ESLint |
 

@@ -1,13 +1,13 @@
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import prisma from '../prismaClient';
-import { queueManager } from '../jobs/queueManager';
+import { sendPasswordResetEmail } from './emailService';
+import logger from '../utils/logger';
 
 export async function requestPasswordReset(email: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return { message: 'If an account exists, a reset link has been sent to your email.' };
 
-  // Revoke any existing tokens for this user
   await prisma.passwordResetToken.updateMany({
     where: { userId: user.id, used: false },
     data: { used: true },
@@ -20,13 +20,14 @@ export async function requestPasswordReset(email: string) {
     data: { userId: user.id, token, expiresAt },
   });
 
-  // Enqueue email job
-  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
-  await queueManager.addJob('email', 'send-password-reset', {
-    to: user.email,
-    subject: 'Password Reset - Student Bio-Data Portal',
-    html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 15 minutes.</p>`,
-  }).catch(() => {});
+  // Send email directly (with SMTP fallback to log if not configured)
+  sendPasswordResetEmail(user.email, token).catch((err) => {
+    logger.error('Failed to send password reset email', {
+      userId: user.id,
+      email: user.email,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  });
 
   return { message: 'If an account exists, a reset link has been sent to your email.' };
 }
