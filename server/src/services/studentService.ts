@@ -45,7 +45,14 @@ export async function createOrUpdateStudent(data: any) {
   if (profile.gender !== undefined) mapped.gender = profile.gender;
   if (profile.address !== undefined) mapped.address = profile.address;
   if (profile.contactPhone !== undefined) mapped.contactPhone = profile.contactPhone;
-  if (profile.programmeId !== undefined) mapped.programmeId = profile.programmeId;
+  if (profile.programmeId !== undefined) {
+    if (profile.programmeId) {
+      const programme = await prisma.programme.findUnique({ where: { id: profile.programmeId } });
+      if (programme) mapped.programmeId = profile.programmeId;
+    } else {
+      mapped.programmeId = null;
+    }
+  }
   if (profile.status !== undefined) mapped.status = profile.status;
   if (profile.reviewerComments !== undefined) mapped.reviewerComments = profile.reviewerComments;
 

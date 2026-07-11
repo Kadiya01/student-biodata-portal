@@ -38,12 +38,16 @@ import api from '../api/api';
 
 // Zod schemas for multi-step validation
 const today = new Date().toISOString().split('T')[0];
+const maxDob = new Date();
+maxDob.setFullYear(maxDob.getFullYear() - 16);
+const maxDobStr = maxDob.toISOString().split('T')[0];
 
 const step1Schema = z.object({
   passportPhoto: z.string().min(1, 'Passport photograph is required'),
   fullName: z.string().min(3, 'Full name must be at least 3 characters'),
   dob: z.string().min(1, 'Date of birth is required')
-    .refine((val) => val <= today, { message: 'Date of birth cannot be in the future' }),
+    .refine((val) => val <= today, { message: 'Date of birth cannot be in the future' })
+    .refine((val) => val <= maxDobStr, { message: 'Student must be at least 16 years old to register' }),
   gender: z.enum(['Male', 'Female'], { errorMap: () => ({ message: 'Gender is required' }) }),
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
@@ -436,7 +440,7 @@ export default function BiodataWizard() {
                     <Input
                       label="Date of Birth"
                       type="date"
-                      max={today}
+                      max={maxDobStr}
                       error={errors.step1?.dob?.message}
                       {...register('step1.dob')}
                     />
