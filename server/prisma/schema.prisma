@@ -7,88 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum StudentStatus {
-  draft
-  submitted
-  under_review
-  approved
-  rejected
-}
-
 model Role {
   id          String   @id @default(uuid())
   name        String   @unique
   description String?
-  users       User[]
   createdAt   DateTime @default(now())
+  users       User[]
 }
 
 model User {
-  id               String    @id @default(uuid())
-  roleId           String
-  role             Role      @relation(fields: [roleId], references: [id])
-  email            String    @unique
-  passwordHash     String
-  firstName        String?
-  lastName         String?
-  phone            String?
-  isActive         Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  lastLoginAt      DateTime?
-  studentProfile   StudentProfile?
-  uploadedDocuments Document[] @relation("uploadedByUser")
-  verifiedDocuments Document[] @relation("verifiedByUser")
-  auditLogs        AuditLog[]
-  notifications    Notification[]
-  refreshTokens    RefreshToken[]
+  id                  String               @id @default(uuid())
+  roleId              String
+  email               String               @unique
+  passwordHash        String
+  firstName           String?
+  lastName            String?
+  phone               String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  lastLoginAt         DateTime?
+  auditLogs           AuditLog[]
+  uploadedDocuments   Document[]           @relation("uploadedByUser")
+  verifiedDocuments   Document[]           @relation("verifiedByUser")
+  notifications       Notification[]
   passwordResetTokens PasswordResetToken[]
+  refreshTokens       RefreshToken[]
+  studentProfile      StudentProfile?
+  role                Role                 @relation(fields: [roleId], references: [id])
 
   @@index([roleId])
   @@index([isActive])
 }
 
 model Department {
-  id         String    @id @default(uuid())
+  id         String      @id @default(uuid())
   name       String
-  code       String    @unique
-  createdAt  DateTime  @default(now())
+  code       String      @unique
+  createdAt  DateTime    @default(now())
   programmes Programme[]
 }
 
 model Programme {
-  id             String     @id @default(uuid())
+  id             String           @id @default(uuid())
   departmentId   String?
-  department     Department? @relation(fields: [departmentId], references: [id])
   name           String
-  code           String     @unique
+  code           String           @unique
   durationMonths Int?
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime         @default(now())
+  department     Department?      @relation(fields: [departmentId], references: [id])
   students       StudentProfile[]
 
   @@index([departmentId])
 }
 
 model StudentProfile {
-  id               String         @id @default(uuid())
-  userId           String         @unique
-  user             User           @relation(fields: [userId], references: [id])
+  id               String        @id @default(uuid())
+  userId           String        @unique
   programmeId      String?
-  programme        Programme?     @relation(fields: [programmeId], references: [id])
-  studentNumber    String?        @unique
+  studentNumber    String?       @unique
   dob              DateTime?
   gender           String?
   nationality      String?
   address          String?
   contactPhone     String?
   bio              Json?
-  status           StudentStatus  @default(draft)
+  status           StudentStatus @default(draft)
   reviewerComments String?
   reviewedBy       String?
   reviewedAt       DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
   documents        Document[]
   nextOfKin        NextOfKin[]
+  programme        Programme?    @relation(fields: [programmeId], references: [id])
+  user             User          @relation(fields: [userId], references: [id])
 
   @@index([programmeId])
   @@index([status])
@@ -99,27 +91,27 @@ model StudentProfile {
 }
 
 model NextOfKin {
-  id         String   @id @default(uuid())
-  studentId  String
-  student    StudentProfile @relation(fields: [studentId], references: [id])
-  fullName   String
+  id           String         @id @default(uuid())
+  studentId    String
+  fullName     String
   relationship String?
-  phone      String?
-  address    String?
-  createdAt  DateTime @default(now())
+  phone        String?
+  address      String?
+  createdAt    DateTime       @default(now())
+  student      StudentProfile @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
 }
 
 model Notification {
-  id         String   @id @default(uuid())
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
-  studentId  String?
-  title      String
-  message    String
-  read       Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String?
+  studentId String?
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([userId, read])
@@ -127,19 +119,19 @@ model Notification {
 }
 
 model Document {
-  id              String   @id @default(uuid())
-  studentId       String
-  student         StudentProfile @relation(fields: [studentId], references: [id])
-  uploadedBy      String?
-  uploadedByUser  User?    @relation("uploadedByUser", fields: [uploadedBy], references: [id])
-  fileUrl         String
-  fileName        String?
-  fileType        String?
-  sizeBytes       Int?
-  verified        Boolean  @default(false)
-  verifiedBy      String?
-  verifiedByUser  User?    @relation("verifiedByUser", fields: [verifiedBy], references: [id])
-  uploadedAt      DateTime @default(now())
+  id             String         @id @default(uuid())
+  studentId      String
+  uploadedBy     String?
+  fileUrl        String
+  fileName       String?
+  fileType       String?
+  sizeBytes      Int?
+  verified       Boolean        @default(false)
+  verifiedBy     String?
+  uploadedAt     DateTime       @default(now())
+  student        StudentProfile @relation(fields: [studentId], references: [id])
+  uploadedByUser User?          @relation("uploadedByUser", fields: [uploadedBy], references: [id])
+  verifiedByUser User?          @relation("verifiedByUser", fields: [verifiedBy], references: [id])
 
   @@index([studentId])
   @@index([uploadedBy])
@@ -149,13 +141,13 @@ model Document {
 model AuditLog {
   id         String   @id @default(uuid())
   userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
   action     String
   entityType String?
   entityId   String?
   details    Json?
   ipAddress  String?
   createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])
@@ -166,11 +158,11 @@ model AuditLog {
 model RefreshToken {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  tokenHash String   @unique
+  tokenHash String   @unique(map: "RefreshToken_token_key")
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([expiresAt])
@@ -179,13 +171,21 @@ model RefreshToken {
 model PasswordResetToken {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   token     String   @unique
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([token, used])
   @@index([expiresAt])
+}
+
+enum StudentStatus {
+  draft
+  submitted
+  under_review
+  approved
+  rejected
 }

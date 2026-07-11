@@ -228,7 +228,7 @@ export default function AdminDashboard() {
       setIsReviewerModalOpen(false);
       fetchData();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to save reviewer.');
+      toast.error(err?.response?.data?.error || err?.response?.data?.message || 'Failed to save reviewer.');
     }
   };
 

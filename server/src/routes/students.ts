@@ -15,6 +15,7 @@ router.put('/:id', requireAuth, validate({ body: studentUpsertSchema }), student
 router.delete('/:id', requireAuth, requireRole('super_admin'), studentController.remove);
 router.put('/approve/:id', requireAuth, requireRole('reviewer', 'super_admin'), studentController.approve);
 router.put('/reject/:id', requireAuth, requireRole('reviewer', 'super_admin'), studentController.reject);
+router.put('/under-review/:id', requireAuth, requireRole('reviewer', 'super_admin'), studentController.markUnderReview);
 router.get('/:id/pdf', requireAuth, pdfController.downloadPdf);
 
 export default router;

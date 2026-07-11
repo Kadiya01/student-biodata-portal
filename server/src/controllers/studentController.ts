@@ -59,6 +59,13 @@ export const remove = catchAsync(async (req: AuthenticatedRequest, res: Response
   res.json({ success: true });
 });
 
+export const markUnderReview = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const profile = await studentService.setStudentStatus(
+    req.params.id, 'under_review', undefined, req.user?.userId
+  );
+  res.json({ profile });
+});
+
 export const approve = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { reviewerComments } = req.body;
   const profile = await studentService.setStudentStatus(

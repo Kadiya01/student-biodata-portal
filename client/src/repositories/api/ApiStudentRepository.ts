@@ -1,5 +1,6 @@
 import api from '../../api/api';
 import { IStudentRepository, SaveBiodataPayload } from '../IStudentRepository';
+import { mapSubmission } from '../../api/mappers';
 
 function getUserIdFromToken(): string | null {
   const token = localStorage.getItem('token');
@@ -24,7 +25,7 @@ export class ApiStudentRepository implements IStudentRepository {
     const student = res.data.student;
     return {
       biodata: student?.bio || null,
-      submission: student || null,
+      submission: mapSubmission(student),
     };
   }
 
@@ -37,6 +38,6 @@ export class ApiStudentRepository implements IStudentRepository {
       status: isSubmitting ? 'submitted' : 'draft',
     };
     const res = await api.post('/students', data);
-    return { submission: res.data.profile };
+    return { submission: mapSubmission(res.data.profile) };
   }
 }

@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', token);
     } else {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     }
   };
 
@@ -68,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success(`Welcome back, ${loggedUser.firstName || 'User'}!`);
       return loggedUser;
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Login failed. Please verify credentials.';
+      const msg = err?.response?.data?.error || err?.response?.data?.message || 'Login failed. Please verify credentials.';
       toast.error(msg);
       throw err;
     }
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Registration Successful!');
       return { user: newUser, regNumber };
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Registration failed. Try again.';
+      const msg = err?.response?.data?.error || err?.response?.data?.message || 'Registration failed. Try again.';
       toast.error(msg);
       throw err;
     }

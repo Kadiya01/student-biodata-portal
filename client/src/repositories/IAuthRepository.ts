@@ -12,11 +12,13 @@ export interface RegisterPayload {
 export interface AuthResult {
   user: User;
   token: string;
+  refreshToken: string;
 }
 
 export interface RegisterResult {
   user: User;
   token: string;
+  refreshToken: string;
   regNumber: string;
 }
 
