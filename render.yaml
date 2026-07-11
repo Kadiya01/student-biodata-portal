@@ -1,41 +1,21 @@
 services:
   - type: web
     name: student-biodata-api
-    env: node
-    region: frankfurt
-    healthCheckPath: /metrics
-    buildCommand: cd server && npm ci && npx prisma generate && npm run build
-    startCommand: cd server && npx prisma migrate deploy && node dist/src/index.js
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --skip-generate && node dist/index.js
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
       - key: CLIENT_URL
         sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
-      - key: SMTP_FROM
-        sync: false
-      - key: CLOUDINARY_URL
-        sync: false
-      - key: SENTRY_DSN
-        sync: false
-      - key: REDIS_HOST
-        sync: false
-      - key: REDIS_PORT
-        sync: false
-      - key: NODE_ENV
-        value: production
       - key: PORT
         value: 4000
-      - key: DATABASE_POOL_SIZE
-        value: 20
-      - key: DATABASE_POOL_TIMEOUT
-        value: 30
