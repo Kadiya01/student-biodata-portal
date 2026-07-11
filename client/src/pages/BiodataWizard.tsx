@@ -34,12 +34,16 @@ import { studentRepo } from '../repositories';
 import { generateRegistrationPDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/api';
 
 // Zod schemas for multi-step validation
+const today = new Date().toISOString().split('T')[0];
+
 const step1Schema = z.object({
   passportPhoto: z.string().min(1, 'Passport photograph is required'),
   fullName: z.string().min(3, 'Full name must be at least 3 characters'),
-  dob: z.string().min(1, 'Date of birth is required'),
+  dob: z.string().min(1, 'Date of birth is required')
+    .refine((val) => val <= today, { message: 'Date of birth cannot be in the future' }),
   gender: z.enum(['Male', 'Female'], { errorMap: () => ({ message: 'Gender is required' }) }),
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
@@ -52,6 +56,7 @@ const subjectSchema = z.object({
 });
 
 const step2Schema = z.object({
+  programmeId: z.string().min(1, 'Programme/Course of study is required'),
   primarySchool: z.string().min(3, 'Primary school name is required'),
   secondarySchool: z.string().min(3, 'Secondary school name is required'),
   ssceType: z.enum(['WAEC', 'NECO', 'NABTEB'], { errorMap: () => ({ message: 'SSCE Type is required' }) }),
@@ -92,6 +97,7 @@ export default function BiodataWizard() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0); // 0 = Personal, 1 = Educational, 2 = Guardian, 3 = Review, 4 = Success
   const [loading, setLoading] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [submissionReceipt, setSubmissionReceipt] = useState<any>(null);
 
   const steps = [
@@ -123,6 +129,7 @@ export default function BiodataWizard() {
         address: '',
       },
       step2: {
+        programmeId: '',
         primarySchool: '',
         secondarySchool: '',
         ssceType: undefined as any,
@@ -145,6 +152,14 @@ export default function BiodataWizard() {
     name: 'step2.ssceSubjects',
   });
 
+  const [programmes, setProgrammes] = useState<{ id: string; name: string; code: string }[]>([]);
+
+  useEffect(() => {
+    api.get('/programmes').then((res) => {
+      setProgrammes(res.data.programmes || []);
+    }).catch(() => {});
+  }, []);
+
   // Load existing draft if present
   useEffect(() => {
     const loadDraft = async () => {
@@ -153,10 +168,15 @@ export default function BiodataWizard() {
         if (res.submission) {
           const sub = res.submission;
           
-          // If already submitted or approved, don't allow modifying
-          if (sub.status !== 'Draft' && sub.status !== 'Rejected') {
+          // If approved, redirect to status page
+          if (sub.status === 'Approved') {
             navigate('/student/status');
             return;
+          }
+
+          // If Under Review or Submitted, show read-only view at review step
+          if (sub.status === 'Under Review' || sub.status === 'Submitted') {
+            setReadOnly(true);
           }
 
           const bio = sub.biodata;
@@ -175,11 +195,19 @@ export default function BiodataWizard() {
             if (bio.ssceSubjects && bio.ssceSubjects.length >= 2) {
               setValue('step2.ssceSubjects', bio.ssceSubjects);
             }
+            if (bio.programmeId) {
+              setValue('step2.programmeId', bio.programmeId);
+            }
 
             setValue('step3.guardianName', bio.guardianName || '');
             setValue('step3.guardianAddress', bio.guardianAddress || '');
             setValue('step3.guardianPhone', bio.guardianPhone || '');
             setValue('step3.guardianRelationship', (bio.guardianRelationship || '') as any);
+
+            // Jump to review step for read-only or Rejected
+            if (sub.status === 'Under Review' || sub.status === 'Submitted') {
+              setCurrentStep(3);
+            }
           }
         }
       } catch (err) {
@@ -221,6 +249,11 @@ export default function BiodataWizard() {
 
   // Navigation handlers
   const handleNext = async () => {
+    if (readOnly) {
+      setCurrentStep((prev) => prev + 1);
+      return;
+    }
+
     // Validate current step fields before proceeding
     let isValid = false;
     if (currentStep === 0) {
@@ -332,21 +365,25 @@ export default function BiodataWizard() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
-                  Biodata Wizard Form
+                <h1 className="text-xl md:2xl font-black text-slate-800 tracking-tight">
+                  {readOnly ? 'Biodata Summary (Read-Only)' : 'Biodata Wizard Form'}
                 </h1>
                 <p className="text-xs text-slate-500 mt-1">
-                  Complete all steps carefully. Your data must pass academic requirements.
+                  {readOnly
+                    ? 'Your biodata is currently under review. You can view but not edit.'
+                    : 'Complete all steps carefully. Your data must pass academic requirements.'}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSaveDraft}
-                className="w-full sm:w-auto"
-              >
-                Save Draft
-              </Button>
+              {!readOnly && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSaveDraft}
+                  className="w-full sm:w-auto"
+                >
+                  Save Draft
+                </Button>
+              )}
             </div>
 
             {/* Stepper Wizard Indicator */}
@@ -399,6 +436,7 @@ export default function BiodataWizard() {
                     <Input
                       label="Date of Birth"
                       type="date"
+                      max={today}
                       error={errors.step1?.dob?.message}
                       {...register('step1.dob')}
                     />
@@ -475,6 +513,25 @@ export default function BiodataWizard() {
                   <CardDescription>Enter details of primary, secondary, and SSCE results</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <div className="w-full">
+                    <Controller
+                      control={control}
+                      name="step2.programmeId"
+                      render={({ field }) => (
+                        <Select
+                          label="Programme / Course of Study"
+                          options={[
+                            { label: 'Select Programme', value: '' },
+                            ...programmes.map((p) => ({ label: `${p.name} (${p.code})`, value: p.id })),
+                          ]}
+                          error={errors.step2?.programmeId?.message}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
                       label="Primary School Attended"
@@ -815,8 +872,11 @@ export default function BiodataWizard() {
                     </h4>
                     <div className="p-4 bg-slate-50 rounded-2xl space-y-3 text-xs text-slate-600 font-semibold">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>Programme: <span className="text-slate-900 font-bold block mt-1">{programmes.find(p => p.id === watch('step2.programmeId'))?.name || 'Not selected'}</span></div>
                         <div>Primary School: <span className="text-slate-900 font-bold block mt-1">{watch('step2.primarySchool')}</span></div>
                         <div>Secondary School: <span className="text-slate-900 font-bold block mt-1">{watch('step2.secondarySchool')}</span></div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>SSCE Body: <span className="text-slate-900 font-bold block mt-1">{watch('step2.ssceType')}</span></div>
                       </div>
 
@@ -870,21 +930,39 @@ export default function BiodataWizard() {
                   >
                     Previous
                   </Button>
-                  <Button
-                    onClick={handleSubmit(onSubmitAll)}
-                    isLoading={loading}
-                    disabled={!isEligible}
-                    rightIcon={<CheckCircle2 className="w-4 h-4" />}
-                  >
-                    Submit Biodata Form
-                  </Button>
+                  {readOnly ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handlePrint}
+                        leftIcon={<Printer className="w-4 h-4" />}
+                      >
+                        Print
+                      </Button>
+                      <Button
+                        onClick={() => navigate('/student')}
+                        rightIcon={<ArrowRight className="w-4 h-4" />}
+                      >
+                        Back to Dashboard
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleSubmit(onSubmitAll)}
+                      isLoading={loading}
+                      disabled={!isEligible}
+                      rightIcon={<CheckCircle2 className="w-4 h-4" />}
+                    >
+                      Submit Biodata Form
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             </motion.div>
           )}
 
           {/* STEP 5: Success Receipt Card */}
-          {currentStep === 4 && submissionReceipt && (
+          {currentStep === 4 && (
             <motion.div
               key="step-4"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -914,19 +992,19 @@ export default function BiodataWizard() {
                       <div>
                         Registration Number:
                         <span className="text-slate-900 block font-black font-mono text-sm tracking-wide mt-0.5">
-                          {submissionReceipt.regNumber}
+                          {submissionReceipt?.regNumber || user?.regNumber || 'N/A'}
                         </span>
                       </div>
                       <div>
                         Student Full Name:
                         <span className="text-slate-900 block font-bold text-sm mt-0.5">
-                          {submissionReceipt.fullName}
+                          {submissionReceipt?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'N/A'}
                         </span>
                       </div>
                       <div>
                         Submission Date:
                         <span className="text-slate-900 block font-semibold mt-0.5">
-                          {new Date(submissionReceipt.submissionDate).toLocaleDateString()}
+                          {submissionReceipt?.submissionDate ? new Date(submissionReceipt.submissionDate).toLocaleDateString() : new Date().toLocaleDateString()}
                         </span>
                       </div>
                       <div>

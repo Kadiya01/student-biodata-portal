@@ -50,7 +50,7 @@ export async function createOrUpdateStudent(data: any) {
   if (profile.reviewerComments !== undefined) mapped.reviewerComments = profile.reviewerComments;
 
   const wizardFields: any = {};
-  const wizardKeys = ['passportPhoto', 'fullName', 'primarySchool', 'secondarySchool', 'ssceType', 'ssceSubjects', 'creditsCount', 'isEligible', 'guardianName', 'guardianAddress', 'guardianPhone', 'guardianRelationship', 'email', 'lastUpdated'];
+  const wizardKeys = ['passportPhoto', 'fullName', 'primarySchool', 'secondarySchool', 'ssceType', 'ssceSubjects', 'creditsCount', 'isEligible', 'guardianName', 'guardianAddress', 'guardianPhone', 'guardianRelationship', 'email', 'lastUpdated', 'programmeId'];
   for (const key of wizardKeys) {
     if (profile[key] !== undefined) wizardFields[key] = profile[key];
   }
