@@ -49,7 +49,11 @@ export class ApiAdminRepository implements IAdminRepository {
 
   async getNotifications(): Promise<{ notifications: any[] }> {
     const res = await api.get('/notifications');
-    return { notifications: res.data.notifications || [] };
+    const notifications = (res.data.notifications || []).map((n: any) => ({
+      ...n,
+      timestamp: n.createdAt || n.timestamp,
+    }));
+    return { notifications };
   }
 
   async markNotificationRead(id: string): Promise<{ success: boolean }> {

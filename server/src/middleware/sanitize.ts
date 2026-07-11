@@ -23,7 +23,7 @@ function stripHtml(input: string): string {
   s = s.replace(/<[^>]*>/g, '');
   s = s.replace(/javascript\s*:/gi, '');
   s = s.replace(/vbscript\s*:/gi, '');
-  s = s.replace(/data\s*:[^,]*;base64/gi, '');
+  s = s.replace(/data\s*:(?!image\/)[^,]*;base64/gi, '');
   s = s.replace(/\bon\w+\s*=\s*(['"])[^'"]*\1/gi, '');
   s = s.replace(/\bon\w+\s*=\s*\S+/gi, '');
   s = s.replace(/expression\s*\(/gi, '');
