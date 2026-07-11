@@ -22,8 +22,20 @@ process.on('uncaughtException', (error: Error) => {
 
 const server = app.listen(port, () => logger.info(`Server listening on port ${port}`));
 
+// Keep Neon free-tier DB alive by pinging every 4 minutes (suspend threshold is 5 min)
+const DB_PING_INTERVAL = 4 * 60 * 1000;
+const dbPingTimer = setInterval(async () => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch (err: any) {
+    logger.warn('DB keep-alive ping failed', { message: err?.message });
+  }
+}, DB_PING_INTERVAL);
+dbPingTimer.unref();
+
 async function shutdown(signal: string) {
   logger.info(`${signal} received. Shutting down gracefully...`);
+  clearInterval(dbPingTimer);
   server.close(async () => {
     await queueManager.closeAll().catch(() => {});
     await prisma.$disconnect();
