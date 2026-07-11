@@ -6,4 +6,4 @@ COPY server/ .
 RUN npx prisma generate
 RUN npm run build
 EXPOSE 4000
-CMD npx prisma migrate deploy && node dist/src/index.js
+CMD npx prisma migrate deploy && node dist/index.js
