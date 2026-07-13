@@ -1,7 +1,9 @@
-import { IStudentRepository, SaveBiodataPayload } from '../IStudentRepository';
+import { IStudentRepository, SaveBiodataPayload, DocumentEntry } from '../IStudentRepository';
 import { getDbUsers, getDbSubmissions, saveDbSubmissions, getDbNotifications, saveDbNotifications, User, Submission } from '../../api/mockDb';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let mockDocs: DocumentEntry[] = [];
 
 function getCurrentUserFromToken(): User | null {
   const token = localStorage.getItem('token');
@@ -75,5 +77,25 @@ export class MockStudentRepository implements IStudentRepository {
     }
 
     return { submission: updatedSub };
+  }
+
+  async getDocuments(): Promise<{ documents: DocumentEntry[] }> {
+    await delay(200);
+    return { documents: mockDocs };
+  }
+
+  async uploadDocument(formData: FormData): Promise<{ document: DocumentEntry }> {
+    await delay(500);
+    const file = formData.get('document') as File;
+    const doc: DocumentEntry = {
+      id: `doc-${Date.now()}`,
+      fileName: file?.name || 'untitled.pdf',
+      fileType: file?.type || 'application/pdf',
+      fileSize: file?.size || 0,
+      category: (formData.get('category') as string) || 'general',
+      uploadedAt: new Date().toISOString(),
+    };
+    mockDocs.unshift(doc);
+    return { document: doc };
   }
 }

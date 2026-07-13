@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { SidebarLayout } from '../components/layout/SidebarLayout';
@@ -16,16 +16,31 @@ import {
   ArrowRight,
   Printer,
   Download,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  File,
+  Trash2
 } from 'lucide-react';
 import { studentRepo } from '../repositories';
 import { Submission } from '../api/mockDb';
 
+interface DocumentEntry {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  category: string;
+  uploadedAt: string;
+}
+
 export default function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [submission, setSubmission] = useState<Submission | null>(null);
+  const [documents, setDocuments] = useState<DocumentEntry[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const [fetchError, setFetchError] = useState(false);
 
@@ -33,12 +48,50 @@ export default function StudentDashboard() {
     setLoading(true);
     setFetchError(false);
     try {
-      const res = await studentRepo.getBiodata();
-      setSubmission(res.submission);
+      const [biodataRes, docsRes] = await Promise.allSettled([
+        studentRepo.getBiodata(),
+        studentRepo.getDocuments()
+      ]);
+      if (biodataRes.status === 'fulfilled') setSubmission(biodataRes.value.submission);
+      if (docsRes.status === 'fulfilled') setDocuments((docsRes.value as any)?.documents || []);
     } catch (e) {
       setFetchError(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
+    if (!allowed.includes(file.type)) {
+      alert('Only PDF, JPEG, PNG, or WebP files are allowed.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File must be under 10 MB.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('category', 'general');
+      await studentRepo.uploadDocument(formData);
+      // refresh document list
+      const docsRes = await studentRepo.getDocuments();
+      setDocuments((docsRes as any)?.documents || []);
+    } catch (err: any) {
+      alert(err?.message || 'Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -313,6 +366,61 @@ export default function StudentDashboard() {
                 >
                   Modify Form & Resubmit
                 </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Document Upload Section */}
+        <Card className="border border-slate-100 overflow-hidden">
+          <CardHeader className="bg-slate-50/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Uploaded Documents</CardTitle>
+                <CardDescription>PDFs, JPEGs, and PNGs related to your academic records</CardDescription>
+              </div>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                size="sm"
+                leftIcon={<Upload className="w-4 h-4" />}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading…' : 'Upload File'}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                className="hidden"
+                onChange={handleUpload}
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {documents.length === 0 ? (
+              <p className="text-sm text-slate-400 text-center py-8">
+                No documents uploaded yet. Click "Upload File" to add supporting documents.
+              </p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-slate-100 rounded-lg">
+                        <File className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">{doc.fileName}</p>
+                        <p className="text-xs text-slate-400">
+                          {doc.category} · {(doc.fileSize / 1024).toFixed(0)} KB · {new Date(doc.uploadedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={doc.fileType.includes('pdf') ? 'info' : 'neutral'}>
+                      {doc.fileType.split('/')[1]?.toUpperCase()}
+                    </Badge>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>

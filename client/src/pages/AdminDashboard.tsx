@@ -29,6 +29,7 @@ import {
   Plus
 } from 'lucide-react';
 import { adminRepo } from '../repositories';
+import { Programme, AuditLogEntry } from '../repositories/IAdminRepository';
 import { generateRegistrationPDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { Submission, User, NotificationItem } from '../api/mockDb';
@@ -69,6 +70,18 @@ export default function AdminDashboard() {
   // Notification logs (Super Admin Only)
   const [systemNotifications, setSystemNotifications] = useState<NotificationItem[]>([]);
 
+  // Programme Management (Super Admin Only)
+  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [isProgrammeModalOpen, setIsProgrammeModalOpen] = useState(false);
+  const [editingProgramme, setEditingProgramme] = useState<Programme | null>(null);
+  const [programmeForm, setProgrammeForm] = useState({ name: '', code: '', departmentId: '', durationMonths: '' });
+
+  // Audit Log (Super Admin Only)
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+
+  // Delete confirmation
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+
   // Fetch all initial data
   const fetchData = async () => {
     setLoading(true);
@@ -86,6 +99,14 @@ export default function AdminDashboard() {
         // Notifications
         const notifRes = await adminRepo.getNotifications();
         setSystemNotifications(notifRes.notifications);
+
+        // Programmes
+        const progRes = await adminRepo.getProgrammes();
+        setProgrammes(progRes.programmes);
+
+        // Audit Logs
+        const auditRes = await adminRepo.getAuditLogs({ limit: 50 });
+        setAuditLogs(auditRes.logs);
       }
     } catch (e) {
       console.error(e);
@@ -242,6 +263,86 @@ export default function AdminDashboard() {
     }
   };
 
+  // Delete Student (Super Admin Only)
+  const handleDeleteStudent = async () => {
+    if (!deleteConfirm.id) return;
+    try {
+      await adminRepo.deleteStudent(deleteConfirm.id);
+      toast.success('Student record deleted.');
+      setDeleteConfirm({ open: false, id: '', name: '' });
+      fetchData();
+    } catch (e) {
+      toast.error('Failed to delete student record.');
+    }
+  };
+
+  // Programme Management (Super Admin Only)
+  const handleOpenAddProgramme = () => {
+    setEditingProgramme(null);
+    setProgrammeForm({ name: '', code: '', departmentId: '', durationMonths: '' });
+    setIsProgrammeModalOpen(true);
+  };
+
+  const handleOpenEditProgramme = (prog: Programme) => {
+    setEditingProgramme(prog);
+    setProgrammeForm({
+      name: prog.name,
+      code: prog.code,
+      departmentId: prog.departmentId || '',
+      durationMonths: prog.durationMonths?.toString() || '',
+    });
+    setIsProgrammeModalOpen(true);
+  };
+
+  const handleSaveProgramme = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!programmeForm.name || !programmeForm.code) {
+      toast.warning('Please enter programme name and code.');
+      return;
+    }
+    try {
+      const data: any = {
+        name: programmeForm.name,
+        code: programmeForm.code,
+      };
+      if (programmeForm.departmentId) data.departmentId = programmeForm.departmentId;
+      if (programmeForm.durationMonths) data.durationMonths = Number(programmeForm.durationMonths);
+
+      if (editingProgramme) {
+        await adminRepo.updateProgramme(editingProgramme.id, data);
+        toast.success('Programme updated.');
+      } else {
+        await adminRepo.createProgramme(data);
+        toast.success('Programme created.');
+      }
+      setIsProgrammeModalOpen(false);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || 'Failed to save programme.');
+    }
+  };
+
+  const handleDeleteProgramme = async (id: string) => {
+    try {
+      await adminRepo.deleteProgramme(id);
+      toast.success('Programme deleted.');
+      fetchData();
+    } catch (e) {
+      toast.error('Failed to delete programme.');
+    }
+  };
+
+  // Notification Mark All Read
+  const handleMarkAllRead = async () => {
+    try {
+      await adminRepo.markAllNotificationsRead();
+      setSystemNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      toast.success('All notifications marked as read.');
+    } catch (e) {
+      toast.error('Failed to mark notifications.');
+    }
+  };
+
   // CSV/PDF Exports
   const handleExportCSV = () => {
     toast.info('Initiating CSV compilation...');
@@ -275,13 +376,21 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleExportSinglePDF = async (studentName: string) => {
-    toast.info(`Compiling individual PDF summary sheet for ${studentName}...`);
+  const handleExportSinglePDF = async (studentName: string, studentId: string) => {
+    toast.info(`Downloading server-generated PDF for ${studentName}...`);
     try {
-      await generateRegistrationPDF('submissions-table', `RCHST_Student_${studentName.replace(/\s+/g, '_')}`);
+      const blob = await adminRepo.downloadPdf(studentId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `RCHST_Student_${studentName.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
       toast.success(`PDF summary for ${studentName} downloaded!`);
     } catch {
-      toast.error('Failed to generate PDF. Please try again.');
+      toast.error('Failed to download PDF. Please try again.');
     }
   };
 
@@ -491,10 +600,20 @@ export default function AdminDashboard() {
                             size="sm"
                             variant="ghost"
                             className="px-2 py-1 text-slate-400 hover:text-teal-700 hover:bg-teal-50"
-                            onClick={() => handleExportSinglePDF(sub.fullName)}
+                            onClick={() => handleExportSinglePDF(sub.fullName, sub.id)}
                           >
                             <Download className="w-3.5 h-3.5" />
                           </Button>
+                          {isSuperAdmin && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="px-2 py-1 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                              onClick={() => setDeleteConfirm({ open: true, id: sub.id, name: sub.fullName })}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -590,6 +709,11 @@ export default function AdminDashboard() {
                     </CardTitle>
                     <CardDescription>Real-time audit log of student registrations</CardDescription>
                   </div>
+                  {systemNotifications.some((n) => !n.read) && (
+                    <Button size="sm" variant="outline" onClick={handleMarkAllRead} leftIcon={<CheckCircle className="w-3.5 h-3.5" />}>
+                      Mark All Read
+                    </Button>
+                  )}
                 </CardHeader>
                 <CardContent className="p-4 overflow-y-auto divide-y divide-slate-50 max-h-[380px] flex-grow">
                   {systemNotifications.length === 0 ? (
@@ -598,7 +722,7 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     systemNotifications.map((n) => (
-                      <div key={n.id} className="py-3 flex flex-col gap-1 text-xs">
+                      <div key={n.id} className={`py-3 flex flex-col gap-1 text-xs ${!n.read ? 'bg-blue-50/50 -mx-4 px-4' : ''}`}>
                         <span className="font-bold text-slate-800">{n.title}</span>
                         <span className="text-slate-500 leading-normal">{n.message}</span>
                         <span className="text-[9px] text-slate-400 font-medium font-sans">
@@ -614,7 +738,107 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* DETAILS/REVIEW STUDENT MODAL */}
+        {/* SUPER ADMIN ONLY: Programme Management */}
+        {isSuperAdmin && (
+          <Card className="border border-slate-100 overflow-hidden">
+            <CardHeader className="bg-slate-50/50 p-6 flex justify-between items-center">
+              <div>
+                <CardTitle>Programme Management</CardTitle>
+                <CardDescription>Create, edit, or remove academic programmes</CardDescription>
+              </div>
+              <Button size="sm" leftIcon={<Plus className="w-4 h-4" />} onClick={handleOpenAddProgramme} className="shadow-premium">
+                Add Programme
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              {programmes.length === 0 ? (
+                <div className="p-8">
+                  <EmptyState title="No Programmes" description="Click 'Add Programme' to create one." />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm divide-y divide-slate-100">
+                    <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
+                      <tr>
+                        <th className="p-4">Name</th>
+                        <th className="p-4">Code</th>
+                        <th className="p-4">Department</th>
+                        <th className="p-4">Duration</th>
+                        <th className="p-4 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700 font-semibold">
+                      {programmes.map((prog) => (
+                        <tr key={prog.id} className="hover:bg-slate-50/30 transition-colors">
+                          <td className="p-4 text-slate-900 font-bold">{prog.name}</td>
+                          <td className="p-4 text-xs font-mono text-teal-800">{prog.code}</td>
+                          <td className="p-4 text-xs">{prog.department?.name || '—'}</td>
+                          <td className="p-4 text-xs">{prog.durationMonths ? `${prog.durationMonths} months` : '—'}</td>
+                          <td className="p-4 flex justify-center gap-2">
+                            <Button size="sm" variant="outline" className="p-2" onClick={() => handleOpenEditProgramme(prog)}>
+                              <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteProgramme(prog.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* SUPER ADMIN ONLY: Audit Log */}
+        {isSuperAdmin && (
+          <Card className="border border-slate-100 overflow-hidden">
+            <CardHeader className="bg-slate-50/50 p-6">
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-brand-primary" /> Audit Log
+              </CardTitle>
+              <CardDescription>System activity trail — who did what and when</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {auditLogs.length === 0 ? (
+                <div className="p-8">
+                  <EmptyState title="No Audit Records" description="Activity will appear here as users interact with the system." />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm divide-y divide-slate-100">
+                    <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
+                      <tr>
+                        <th className="p-4">Action</th>
+                        <th className="p-4">User</th>
+                        <th className="p-4">Entity</th>
+                        <th className="p-4">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                      {auditLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/30 transition-colors">
+                          <td className="p-4">
+                            <Badge variant={log.action.includes('delete') ? 'error' : log.action.includes('approve') ? 'success' : 'neutral'}>
+                              {log.action}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-xs font-sans">{log.user ? `${log.user.firstName || ''} ${log.user.lastName || ''}`.trim() || log.user.email : 'System'}</td>
+                          <td className="p-4 text-xs font-mono text-slate-500">{log.entityType || '—'}</td>
+                          <td className="p-4 text-xs font-sans text-slate-400">{new Date(log.createdAt).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* DELETE STUDENT CONFIRMATION MODAL */}
         <Modal
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
@@ -788,6 +1012,72 @@ export default function AdminDashboard() {
               </Button>
               <Button type="submit">
                 Save Reviewer Account
+              </Button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* DELETE STUDENT CONFIRMATION MODAL */}
+        <Modal
+          isOpen={deleteConfirm.open}
+          onClose={() => setDeleteConfirm({ open: false, id: '', name: '' })}
+          title="Delete Student Record"
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Are you sure you want to permanently delete the record for <strong>{deleteConfirm.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setDeleteConfirm({ open: false, id: '', name: '' })}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDeleteStudent}>
+                Delete Record
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* ADD/EDIT PROGRAMME MODAL (SUPER ADMIN ONLY) */}
+        <Modal
+          isOpen={isProgrammeModalOpen}
+          onClose={() => setIsProgrammeModalOpen(false)}
+          title={editingProgramme ? 'Edit Programme' : 'Add Programme'}
+          size="md"
+        >
+          <form onSubmit={handleSaveProgramme} className="space-y-4">
+            <Input
+              label="Programme Name"
+              value={programmeForm.name}
+              onChange={(e) => setProgrammeForm({ ...programmeForm, name: e.target.value })}
+              placeholder="e.g. General Health Studies"
+            />
+            <Input
+              label="Programme Code"
+              value={programmeForm.code}
+              onChange={(e) => setProgrammeForm({ ...programmeForm, code: e.target.value })}
+              placeholder="e.g. GHS-001"
+            />
+            <Input
+              label="Department ID (optional)"
+              value={programmeForm.departmentId}
+              onChange={(e) => setProgrammeForm({ ...programmeForm, departmentId: e.target.value })}
+              placeholder="UUID of department"
+            />
+            <Input
+              label="Duration in Months (optional)"
+              type="number"
+              value={programmeForm.durationMonths}
+              onChange={(e) => setProgrammeForm({ ...programmeForm, durationMonths: e.target.value })}
+              placeholder="e.g. 24"
+            />
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-50">
+              <Button type="button" variant="outline" onClick={() => setIsProgrammeModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingProgramme ? 'Update Programme' : 'Create Programme'}
               </Button>
             </div>
           </form>

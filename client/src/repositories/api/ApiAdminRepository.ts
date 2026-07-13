@@ -27,6 +27,16 @@ export class ApiAdminRepository implements IAdminRepository {
     return { submission: mapSubmission(res.data.profile) };
   }
 
+  async deleteStudent(id: string): Promise<{ success: boolean }> {
+    await api.delete(`/students/${id}`);
+    return { success: true };
+  }
+
+  async downloadPdf(studentId: string): Promise<Blob> {
+    const res = await api.get(`/students/${studentId}/pdf`, { responseType: 'blob' });
+    return res.data as Blob;
+  }
+
   async getReviewers(): Promise<{ reviewers: any[] }> {
     const res = await api.get('/users?role=reviewer');
     return { reviewers: res.data.users };
@@ -59,5 +69,46 @@ export class ApiAdminRepository implements IAdminRepository {
   async markNotificationRead(id: string): Promise<{ success: boolean }> {
     await api.put(`/notifications/${id}/read`);
     return { success: true };
+  }
+
+  async markAllNotificationsRead(): Promise<{ success: boolean }> {
+    await api.put('/notifications/read-all');
+    return { success: true };
+  }
+
+  async getProgrammes(): Promise<{ programmes: any[] }> {
+    const res = await api.get('/programmes');
+    return { programmes: res.data.programmes || [] };
+  }
+
+  async getDepartments(): Promise<{ departments: any[] }> {
+    const res = await api.get('/programmes/departments');
+    return { departments: res.data.departments || [] };
+  }
+
+  async createProgramme(data: { name: string; code: string; departmentId?: string; durationMonths?: number }): Promise<{ programme: any }> {
+    const res = await api.post('/programmes', data);
+    return { programme: res.data.programme };
+  }
+
+  async updateProgramme(id: string, data: Partial<{ name: string; code: string; departmentId: string; durationMonths: number }>): Promise<{ programme: any }> {
+    const res = await api.put(`/programmes/${id}`, data);
+    return { programme: res.data.programme };
+  }
+
+  async deleteProgramme(id: string): Promise<{ success: boolean }> {
+    await api.delete(`/programmes/${id}`);
+    return { success: true };
+  }
+
+  async getAuditLogs(params?: { limit?: number; offset?: number; action?: string; entityType?: string }): Promise<{ logs: any[]; total: number }> {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.offset) query.set('offset', String(params.offset));
+    if (params?.action) query.set('action', params.action);
+    if (params?.entityType) query.set('entityType', params.entityType);
+    const qs = query.toString();
+    const res = await api.get(`/audit${qs ? `?${qs}` : ''}`);
+    return { logs: res.data.logs || [], total: res.data.total || 0 };
   }
 }

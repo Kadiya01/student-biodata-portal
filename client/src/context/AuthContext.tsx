@@ -87,7 +87,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetch(`${(import.meta as any).env.VITE_API_URL || '/api/v1'}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        }).catch(() => {});
+      }
+    } catch {}
     setUser(null);
     setToken(null);
     toast.info('Logged out successfully.');

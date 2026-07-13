@@ -149,4 +149,51 @@ export class MockAdminRepository implements IAdminRepository {
     }
     return { success: true };
   }
+
+  async markAllNotificationsRead(): Promise<{ success: boolean }> {
+    await delay(200);
+    const notifications = getDbNotifications().map((n) => ({ ...n, read: true }));
+    saveDbNotifications(notifications);
+    return { success: true };
+  }
+
+  async deleteStudent(_id: string): Promise<{ success: boolean }> {
+    await delay(300);
+    return { success: true };
+  }
+
+  async downloadPdf(_studentId: string): Promise<Blob> {
+    await delay(300);
+    return new Blob(['Mock PDF content'], { type: 'application/pdf' });
+  }
+
+  async getProgrammes(): Promise<{ programmes: any[] }> {
+    await delay(200);
+    return { programmes: [] };
+  }
+
+  async getDepartments(): Promise<{ departments: any[] }> {
+    await delay(200);
+    return { departments: [] };
+  }
+
+  async createProgramme(data: { name: string; code: string; departmentId?: string; durationMonths?: number }): Promise<{ programme: any }> {
+    await delay(400);
+    return { programme: { id: `prog-${Date.now()}`, ...data, department: null } };
+  }
+
+  async updateProgramme(id: string, data: Partial<{ name: string; code: string; departmentId: string; durationMonths: number }>): Promise<{ programme: any }> {
+    await delay(300);
+    return { programme: { id, ...data, department: null } };
+  }
+
+  async deleteProgramme(_id: string): Promise<{ success: boolean }> {
+    await delay(300);
+    return { success: true };
+  }
+
+  async getAuditLogs(): Promise<{ logs: any[]; total: number }> {
+    await delay(300);
+    return { logs: [], total: 0 };
+  }
 }

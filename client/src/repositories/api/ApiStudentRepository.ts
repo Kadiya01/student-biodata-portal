@@ -1,5 +1,5 @@
 import api from '../../api/api';
-import { IStudentRepository, SaveBiodataPayload } from '../IStudentRepository';
+import { IStudentRepository, SaveBiodataPayload, DocumentEntry } from '../IStudentRepository';
 import { mapSubmission } from '../../api/mappers';
 
 function getUserIdFromToken(): string | null {
@@ -39,5 +39,33 @@ export class ApiStudentRepository implements IStudentRepository {
     };
     const res = await api.post('/students', data);
     return { submission: mapSubmission(res.data.profile) };
+  }
+
+  async getDocuments(): Promise<{ documents: DocumentEntry[] }> {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      const err: any = new Error('Unauthorized');
+      err.response = { status: 401, data: { message: 'Unauthorized' } };
+      throw err;
+    }
+    // First get student profile to find studentId
+    const profileRes = await api.get(`/students/by-user/${userId}`);
+    const studentId = profileRes.data.student?.id;
+    if (!studentId) return { documents: [] };
+    const res = await api.get(`/documents/student/${studentId}`);
+    return { documents: res.data.documents || [] };
+  }
+
+  async uploadDocument(formData: FormData): Promise<{ document: DocumentEntry }> {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      const err: any = new Error('Unauthorized');
+      err.response = { status: 401, data: { message: 'Unauthorized' } };
+      throw err;
+    }
+    const res = await api.post('/documents/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return { document: res.data.document };
   }
 }
