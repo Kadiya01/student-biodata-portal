@@ -164,7 +164,7 @@ function renderBiodata(doc: PDFKit.PDFDocument, profile: any, bio: any): void {
   doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
   doc.moveDown(0.3);
   doc.fontSize(8).font('Helvetica').text(
-    `Generated on ${new Date().toLocaleDateString()} | Student Bio-Data System | Rauda College`,
+    `Generated on ${new Date().toLocaleDateString()} | Student Bio-Data System | College of Health Science and Technology`,
     { align: 'center' }
   );
 }

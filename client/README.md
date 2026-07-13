@@ -1,5 +1,5 @@
 # Student Biodata Portal — Frontend
-**Rauda College of Health Science and Technology**
+**College of Health Science and Technology**
 
 > Built with React + TypeScript + Tailwind CSS + Framer Motion
 

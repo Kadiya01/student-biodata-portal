@@ -1,5 +1,5 @@
 # Student Bio-Data & Records Management System
-**Rauda College of Health Science and Technology, Kano**
+**College of Health Science and Technology, Kano**
 
 A full-stack monorepo for managing student academic biodata — from registration through to reviewer approval, document upload, and PDF generation.
 

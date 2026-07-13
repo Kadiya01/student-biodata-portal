@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document captures the high-level architecture for the Student Bio-Data & Records Management System built for Rauda College of Health Science and Technology Kano. It describes components, data flow, API surface, deployment targets, security considerations, and next steps for Milestone 1.
+This document captures the high-level architecture for the Student Bio-Data & Records Management System built for College of Health Science and Technology Kano. It describes components, data flow, API surface, deployment targets, security considerations, and next steps for Milestone 1.
 
 ## High-level Components
 

@@ -85,7 +85,7 @@ export async function sendStatusNotification(
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #0d9488; color: white; padding: 20px; text-align: center;">
-        <h2>Rauda College of Health Science and Technology</h2>
+        <h2>College of Health Science and Technology</h2>
       </div>
       <div style="padding: 20px; background: #f8fafc;">
         <h3>Biodata ${status.charAt(0).toUpperCase() + status.slice(1)}</h3>

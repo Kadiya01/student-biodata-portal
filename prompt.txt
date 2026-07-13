@@ -6,7 +6,7 @@ Below is a **master frontend prompt** optimized for AI website builders like **A
 
 ## Project Title
 
-**Student Biodata Portal for Rauda College of Health Science and Technology**
+**Student Biodata Portal for College of Health Science and Technology**
 
 ---
 
@@ -51,7 +51,7 @@ The project must be fully responsive for:
 
 Institution:
 
-**Rauda College of Health Science and Technology**
+**College of Health Science and Technology**
 
 Theme:
 

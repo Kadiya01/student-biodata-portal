@@ -1,8 +1,8 @@
-# Rauda College of Health Science and Technology - Student Biodata Portal
+# College of Health Science and Technology - Student Biodata Portal
 
 ## About
 
-The Student Biodata and Records Management Portal for Rauda College of Health Science and Technology (RCHST), Kano. This system enables students to register accounts, fill in their academic biodata (personal info, WAEC/NECO/NABTEB results, guardian info), upload documents, and submit for verification. Staff reviewers and administrators can review submissions, approve or reject records, manage programmes and departments, and export data.
+The Student Biodata and Records Management Portal for College of Health Science and Technology (RCHST), Kano. This system enables students to register accounts, fill in their academic biodata (personal info, WAEC/NECO/NABTEB results, guardian info), upload documents, and submit for verification. Staff reviewers and administrators can review submissions, approve or reject records, manage programmes and departments, and export data.
 
 ## Key Links
 

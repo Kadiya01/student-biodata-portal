@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS)
 ## Student Bio-Data & Records Management System
 
-**Institution:** Rauda College of Health Science and Technology, Kano  
+**Institution:** College of Health Science and Technology, Kano  
 **Version:** 1.0  
 **Date:** July 2026
 
