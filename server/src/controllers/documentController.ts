@@ -15,16 +15,16 @@ export const upload = catchAsync(async (req: AuthenticatedRequest, res: Response
 
   if (isCloudinaryConfigured()) {
     try {
-      const result = await uploadToCloudinary(file.path, {
+      const result = await uploadToCloudinary(file.buffer || file.path, {
         folder: `student-biodata/${studentId}`,
       });
       fileUrl = result.url;
     } catch (err) {
       logger.error('Cloudinary upload failed, falling back to local', { error: err });
-      fileUrl = file.path || file.filename;
+      fileUrl = file.originalname;
     }
   } else {
-    fileUrl = file.path || file.location || file.filename;
+    fileUrl = file.originalname;
   }
 
   const doc = await prisma.document.create({

@@ -15,11 +15,11 @@ export function isCloudinaryConfigured(): boolean {
 }
 
 export async function uploadToCloudinary(
-  filePath: string,
+  fileInput: string | Buffer,
   options: { folder?: string; resource_type?: string } = {}
 ): Promise<{ url: string; publicId: string }> {
   configureCloudinary();
-  const result = await cloudinary.uploader.upload(filePath, {
+  const result = await cloudinary.uploader.upload(fileInput as any, {
     folder: options.folder || 'student-biodata',
     resource_type: (options.resource_type as any) || 'auto',
   });

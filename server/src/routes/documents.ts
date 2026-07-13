@@ -14,7 +14,7 @@ const ALLOWED_TYPES = [
 ];
 
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req: any, file: any, cb: any) => {
     if (ALLOWED_TYPES.includes(file.mimetype)) {
