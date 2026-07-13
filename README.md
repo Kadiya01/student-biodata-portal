@@ -1,7 +1,7 @@
 # Student Bio-Data & Records Management System
 **Rauda College of Health Science and Technology, Kano**
 
-A full-stack monorepo for managing student academic biodata — from registration through to reviewer approval and PDF generation.
+A full-stack monorepo for managing student academic biodata — from registration through to reviewer approval, document upload, and PDF generation.
 
 ---
 
@@ -13,11 +13,12 @@ A full-stack monorepo for managing student academic biodata — from registratio
 | Backend | Node.js, Express, TypeScript, Prisma ORM, PostgreSQL |
 | Auth | JWT (HS256), bcrypt, refresh token rotation |
 | Background Jobs | BullMQ + Redis (optional, degrades gracefully) |
-| File Storage | Cloudinary (production), Multer (local fallback) |
-| Email | Nodemailer SMTP (optional, falls back to logging) |
+| File Storage | Cloudinary (production), Multer memoryStorage (Render-compatible fallback) |
+| Email | Nodemailer SMTP (optional, falls back to console logging) |
 | Monitoring | Sentry error tracking, Winston structured logging |
 | Testing | Jest + Supertest (server), Vitest (client) |
 | Deployment | Render (backend), Vercel (frontend), Neon (PostgreSQL) |
+| Agentic Browsing | `llms.txt`, `robots.txt` for AI-readable site metadata |
 
 ---
 
@@ -30,6 +31,7 @@ A full-stack monorepo for managing student academic biodata — from registratio
 ├── database/       ← SQL schema & seed files
 ├── docs/           ← API docs, deployment guide, SRS, architecture
 ├── scripts/        ← Utility and deployment scripts
+├── Dockerfile      ← Production container (node:18 + Prisma migrate)
 └── render.yaml     ← Render deployment config
 ```
 
@@ -61,20 +63,48 @@ npm run dev
 
 > The frontend starts in **mock mode** by default (`VITE_USE_MOCK=true`), using fake data. Set `VITE_USE_MOCK=false` and ensure the backend is running for real API calls.
 
+### First-Time Bootstrap
+
+On first startup, the server automatically:
+- Creates roles (`student`, `reviewer`, `super_admin`)
+- Creates a default super admin account (`admin@college.edu.ng` / `password123`)
+- Seeds 4 departments and 7 programmes
+
+Override the default admin with `ADMIN_EMAIL` and `ADMIN_PASSWORD` environment variables.
+
 ---
 
 ## User Roles
 
-| Role | Description | Login |
+| Role | Capabilities | Login |
 |------|-------------|-------|
-| **Student** | Registers, fills multi-step biodata wizard, tracks submission status, downloads PDF | `/login` |
-| **Reviewer** | Reviews submissions, approves/rejects with comments, exports CSV/PDF | `/admin-login` |
-| **Super Admin** | Manages reviewer accounts, views audit log, system metrics | `/admin-login` |
+| **Student** | Register, fill multi-step biodata wizard, upload documents (PDF/JPEG/PNG/WebP ≤5MB), track submission status, download registration summary PDF, change password | `/login` |
+| **Reviewer** | Review submissions, approve/reject with comments, mark as under-review, view student biodata details, export CSV, download server-generated PDF per student | `/admin-login` |
+| **Super Admin** | All reviewer capabilities + manage reviewer accounts, manage programmes (add/edit), view audit log, view/manage notifications (mark-all-read), change password | `/admin-login` |
 
 ---
 
-## Security Features
+## Key Features
 
+### Student Portal
+- Multi-step biodata wizard with validation at every step
+- Live credit check calculation (English, Maths, minimum 5 subjects)
+- Document upload to Cloudinary (or filename fallback on local dev)
+- Submission status tracking with reviewer comments
+- Forgot/reset password flow (dev mode returns reset link in response)
+- Change password (authenticated)
+
+### Staff Dashboard
+- Submissions table with pagination (20 per page)
+- Approve / Reject / Mark Under-Review with comment threads
+- Programme management (add/edit modal)
+- Audit log viewer with filters (user, action, date range)
+- Notification system with mark-all-read
+- Server-side PDF download per student (no client-side generation needed)
+- Bulk CSV/PDF export for all submissions
+- Change password (authenticated)
+
+### Security
 - **Passwords:** bcrypt hashed (10 rounds), never stored in plaintext
 - **JWT:** HS256 pinned, 32-char minimum secret, 1-hour expiry
 - **Refresh Tokens:** Rotation with TOCTOU-safe atomic revoke-and-issue, SHA-256 hashed at rest
@@ -85,34 +115,42 @@ npm run dev
 - **Audit Logging:** Every significant action recorded with timestamp, user, and IP
 - **Production Error Masking:** Internal errors hidden from client responses
 - **CORS / Helmet / CSP:** Configured for production security
+- **Graceful Degradation:** Redis/BullMQ/Sentry/Cloudinary all degrade gracefully when unavailable
+
+### Performance
+- Code splitting via `React.lazy` — main bundle ~337KB, page chunks loaded on demand
+- Non-blocking Google Fonts (preload + onload swap)
+- Tailwind CSS purging for minimal CSS output
 
 ---
 
 ## Testing
 
-### Server Tests (9 suites, 60 tests)
+### Server Tests (9 suites)
 ```powershell
 cd server
 npm test
 ```
 
-| Suite | Tests | What it covers |
-|-------|-------|----------------|
-| auth | 3 | Registration, login, /me endpoint |
-| security | 21 | Privilege escalation, IDOR, XSS, rate limiting, pagination, token security |
-| students | 6 | CRUD, approve/reject, auth checks |
-| users | 6 | List, update, toggle, auth checks |
-| documents | 5 | Upload, list, auth checks |
-| audit | 5 | List, pagination, auth checks |
-| programmes | 8 | CRUD, departments, auth checks |
-| notifications | 4 | List, read, read-all, auth checks |
-| passwordReset | 8 | Forgot/reset password flow |
+| Suite | What it covers |
+|-------|----------------|
+| auth | Registration, login, /me endpoint |
+| security | Privilege escalation, IDOR, XSS, rate limiting, pagination, token security |
+| students | CRUD, approve/reject, auth checks |
+| users | List, update, toggle, auth checks |
+| documents | Upload, list, auth checks |
+| audit | List, pagination, auth checks |
+| programmes | CRUD, departments, auth checks |
+| notifications | List, read, read-all, auth checks |
+| passwordReset | Forgot/reset password flow |
 
-### Client Tests (16 suites, 100 tests)
+### Client Tests
 ```powershell
 cd client
 npm run test
 ```
+
+Mock repository tests for `StudentRepository`, `AdminRepository`, and `AuthRepository`.
 
 ---
 
@@ -123,9 +161,22 @@ See [docs/DEPLOY/README.md](./docs/DEPLOY/README.md) for the full deployment gui
 **TL;DR:**
 1. Create a Neon PostgreSQL database
 2. Push to GitHub — Render auto-deploys via `render.yaml`
-3. Set environment variables in Render dashboard
-4. Deploy frontend to Vercel
-5. Run seed script: `npx ts-node-dev --transpile-only prisma/seed.ts`
+3. Set environment variables in Render dashboard:
+   - `DATABASE_URL` — Neon connection string (with `?sslmode=require`)
+   - `JWT_SECRET` — 64-char hex string
+   - `NODE_ENV=production`
+   - `CLIENT_URL=https://your-frontend.vercel.app`
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — optional, overrides default super admin
+   - `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` — optional, enables email notifications
+4. Deploy frontend to Vercel with env var `VITE_USE_MOCK=false`
+5. Server auto-bootstraps on first startup (roles, admin, departments, programmes)
+
+**Default Credentials (dev/bootstrap):**
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@college.edu.ng` | `password123` | Super Admin |
+| `reviewer@college.edu.ng` | `password123` | Reviewer |
+| `student@college.edu.ng` | `password123` | Student |
 
 ---
 
