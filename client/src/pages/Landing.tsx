@@ -9,7 +9,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center py-6 md:py-12">
+    <main className="min-h-[85vh] flex flex-col justify-center py-6 md:py-12">
       {/* Brand Header */}
       <div className="text-center space-y-4 max-w-4xl mx-auto">
         <AnimatedHeroGraphic />
@@ -84,7 +84,7 @@ export default function Landing() {
 
       {/* Feature Bullet Highlights */}
       <div className="max-w-4xl mx-auto mt-16 px-4">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-6">
+        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center mb-6">
           System Core Features
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -111,6 +111,6 @@ export default function Landing() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /student
+Disallow: /change-password
+
+Sitemap: https://student-biodata-portal.vercel.app/sitemap.xml
