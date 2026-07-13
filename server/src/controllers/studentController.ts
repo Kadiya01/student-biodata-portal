@@ -5,6 +5,7 @@ import * as notificationService from '../services/notificationService';
 import { sendStatusNotification } from '../services/emailService';
 import { catchAsync, parsePagination } from '../middleware/catchAsync';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import prisma from '../prismaClient';
 
 export const list = catchAsync(async (req: Request, res: Response) => {
   const { search, status } = req.query as Record<string, string>;
@@ -64,8 +65,9 @@ export const markUnderReview = catchAsync(async (req: AuthenticatedRequest, res:
   const profile = await studentService.setStudentStatus(
     req.params.id, 'under_review', undefined, req.user?.userId
   );
-  if (profile.user?.email) {
-    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'under review');
+  const user = await prisma.user.findUnique({ where: { id: profile.userId } });
+  if (user?.email) {
+    sendStatusNotification(user.email, (profile.bio as any)?.fullName || profile.studentNumber || 'Student', 'under review');
   }
   res.json({ profile });
 });
@@ -84,14 +86,15 @@ export const approve = catchAsync(async (req: AuthenticatedRequest, res: Respons
     ipAddress: req.ip
   });
   if (profile.userId) {
+    const user = await prisma.user.findUnique({ where: { id: profile.userId } });
     await notificationService.createNotification({
       userId: profile.userId,
       title: 'Submission Approved',
       message: 'Your biodata submission has been approved.'
     });
-  }
-  if (profile.user?.email) {
-    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'approved', reviewerComments);
+    if (user?.email) {
+      sendStatusNotification(user.email, (profile.bio as any)?.fullName || profile.studentNumber || 'Student', 'approved', reviewerComments);
+    }
   }
   res.json({ profile });
 });
@@ -110,14 +113,15 @@ export const reject = catchAsync(async (req: AuthenticatedRequest, res: Response
     ipAddress: req.ip
   });
   if (profile.userId) {
+    const user = await prisma.user.findUnique({ where: { id: profile.userId } });
     await notificationService.createNotification({
       userId: profile.userId,
       title: 'Submission Rejected',
       message: `Your biodata submission was rejected. Comment: ${reviewerComments || 'None'}`
     });
-  }
-  if (profile.user?.email) {
-    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'rejected', reviewerComments);
+    if (user?.email) {
+      sendStatusNotification(user.email, (profile.bio as any)?.fullName || profile.studentNumber || 'Student', 'rejected', reviewerComments);
+    }
   }
   res.json({ profile });
 });
