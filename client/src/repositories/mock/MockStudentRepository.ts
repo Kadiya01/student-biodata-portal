@@ -86,7 +86,7 @@ export class MockStudentRepository implements IStudentRepository {
 
   async uploadDocument(formData: FormData): Promise<{ document: DocumentEntry }> {
     await delay(500);
-    const file = formData.get('document') as File;
+    const file = formData.get('file') as File;
     const doc: DocumentEntry = {
       id: `doc-${Date.now()}`,
       fileName: file?.name || 'untitled.pdf',

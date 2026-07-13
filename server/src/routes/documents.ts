@@ -27,7 +27,7 @@ const upload = multer({
 
 const router = Router();
 
-router.post('/upload', requireAuth, validate({ body: documentUploadSchema }), upload.single('file'), documentController.upload);
+router.post('/upload', requireAuth, upload.single('file'), validate({ body: documentUploadSchema }), documentController.upload);
 router.get('/:studentId', requireAuth, documentController.listByStudent);
 
 export default router;

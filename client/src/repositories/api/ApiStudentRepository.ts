@@ -48,12 +48,11 @@ export class ApiStudentRepository implements IStudentRepository {
       err.response = { status: 401, data: { message: 'Unauthorized' } };
       throw err;
     }
-    // First get student profile to find studentId
     const profileRes = await api.get(`/students/by-user/${userId}`);
     const studentId = profileRes.data.student?.id;
     if (!studentId) return { documents: [] };
-    const res = await api.get(`/documents/student/${studentId}`);
-    return { documents: res.data.documents || [] };
+    const res = await api.get(`/documents/${studentId}`);
+    return { documents: res.data.docs || [] };
   }
 
   async uploadDocument(formData: FormData): Promise<{ document: DocumentEntry }> {
@@ -63,9 +62,12 @@ export class ApiStudentRepository implements IStudentRepository {
       err.response = { status: 401, data: { message: 'Unauthorized' } };
       throw err;
     }
+    const profileRes = await api.get(`/students/by-user/${userId}`);
+    const studentId = profileRes.data.student?.id;
+    if (studentId) formData.append('studentId', studentId);
     const res = await api.post('/documents/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return { document: res.data.document };
+    return { document: res.data.doc };
   }
 }

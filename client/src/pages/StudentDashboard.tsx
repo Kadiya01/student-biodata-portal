@@ -74,14 +74,14 @@ export default function StudentDashboard() {
       alert('Only PDF, JPEG, PNG, or WebP files are allowed.');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File must be under 10 MB.');
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File must be under 5 MB.');
       return;
     }
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('document', file);
+      formData.append('file', file);
       formData.append('category', 'general');
       await studentRepo.uploadDocument(formData);
       // refresh document list
