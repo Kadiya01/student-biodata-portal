@@ -62,8 +62,8 @@ export default function ResetPassword() {
               <div className="mx-auto w-12 h-12 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-red-500 mb-4">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mb-2">Invalid Link</h2>
-              <p className="text-sm text-slate-500 mb-6">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-2">Invalid Link</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                 This password reset link is invalid or missing a token.
               </p>
               <Link to="/forgot-password">
@@ -100,8 +100,8 @@ export default function ResetPassword() {
               <div className="mx-auto w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-4">
                 <CheckCircle className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mb-2">Password Reset!</h2>
-              <p className="text-sm text-slate-500 mb-6">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-2">Password Reset!</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                 Your password has been updated. You can now log in with your new password.
               </p>
               <Button
@@ -130,12 +130,12 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8">
-      <div className="w-full max-w-md mb-4 flex justify-start">
-        <Link
-          to="/login"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-        >
+      <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8 bg-brand-bg dark:bg-slate-900">
+        <div className="w-full max-w-md mb-4 flex justify-start">
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
           <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
       </div>
@@ -190,8 +190,8 @@ export default function ResetPassword() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex justify-center text-center border-t border-slate-50 bg-slate-50/30">
-            <p className="text-xs text-slate-500 font-semibold">
+          <CardFooter className="flex justify-center text-center border-t border-slate-50 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/50">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
               Remember your password?{' '}
               <Link to="/login" className="text-brand-primary hover:text-teal-800 font-bold transition-colors">
                 Log in

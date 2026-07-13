@@ -54,7 +54,7 @@ export default function ChangePassword() {
           </CardHeader>
           <CardContent>
             {success && (
-              <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 p-3 rounded-xl mb-4 text-sm font-medium">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl mb-4 text-sm font-medium">
                 <CheckCircle className="w-4 h-4" />
                 Password changed successfully.
               </div>
@@ -84,7 +84,7 @@ export default function ChangePassword() {
                 placeholder="Confirm new password"
                 required
               />
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Password must be at least 8 characters with 1 uppercase letter and 1 number.
               </p>
               <Button type="submit" leftIcon={<Lock className="w-4 h-4" />} disabled={loading}>

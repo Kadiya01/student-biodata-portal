@@ -23,14 +23,14 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:shadow-none disabled:active:scale-100';
-  
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:border-slate-200 dark:disabled:border-slate-700 disabled:shadow-none disabled:active:scale-100';
+
   const variants = {
-    primary: 'bg-brand-primary text-white hover:bg-teal-800 focus-visible:ring-brand-primary shadow-sm hover:shadow-premium',
+    primary: 'bg-brand-primary text-white hover:bg-teal-800 focus-visible:ring-brand-primary shadow-sm hover:shadow-premium dark:hover:shadow-dark-premium',
     secondary: 'bg-brand-secondary text-white hover:bg-teal-600 focus-visible:ring-brand-secondary shadow-sm',
     accent: 'bg-brand-accent text-white hover:bg-amber-600 focus-visible:ring-brand-accent shadow-sm',
-    outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-500',
-    ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 focus-visible:ring-slate-500',
+    outline: 'border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:ring-slate-500',
+    ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-950 dark:hover:text-white focus-visible:ring-slate-500',
     danger: 'bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500 shadow-sm',
   };
 

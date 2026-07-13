@@ -1,13 +1,14 @@
 module.exports = {
   content: ['./index.html', './src/**/*.{ts,tsx,js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         brand: {
-          primary: '#0F766E',      // Modern Academic primary
-          secondary: '#14B8A6',    // Modern Academic secondary
-          accent: '#F59E0B',       // Accent
-          bg: '#F8FAFC',           // Background slate
+          primary: '#0F766E',
+          secondary: '#14B8A6',
+          accent: '#F59E0B',
+          bg: '#F8FAFC',
           card: '#FFFFFF',
           dark: '#0f172a',
         },
@@ -30,6 +31,8 @@ module.exports = {
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
         'premium': '0 10px 30px -10px rgba(15, 118, 110, 0.1), 0 1px 3px rgba(0, 0, 0, 0.02)',
+        'dark-soft': '0 4px 20px -2px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+        'dark-premium': '0 10px 30px -10px rgba(15, 118, 110, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)',
       }
     }
   },

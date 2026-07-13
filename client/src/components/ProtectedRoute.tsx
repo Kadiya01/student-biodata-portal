@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-bg">
+        <div className="min-h-screen flex items-center justify-center bg-brand-bg dark:bg-slate-900">
         <div className="relative flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
           <span className="text-xs font-semibold text-teal-800 tracking-wider animate-pulse">Loading Portal...</span>

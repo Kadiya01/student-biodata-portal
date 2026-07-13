@@ -45,11 +45,11 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8">
+      <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8 bg-brand-bg dark:bg-slate-900">
         <div className="w-full max-w-md mb-4 flex justify-start">
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Login
           </Link>
@@ -65,8 +65,8 @@ export default function ForgotPassword() {
               <div className="mx-auto w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-4">
                 <CheckCircle className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mb-2">Check Your Email</h2>
-              <p className="text-sm text-slate-500 mb-4">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-2">Check Your Email</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                 If an account exists with that email, a password reset link has been sent.
               </p>
               {resetLink && (
@@ -93,11 +93,11 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8">
+      <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8 bg-brand-bg dark:bg-slate-900">
       <div className="w-full max-w-md mb-4 flex justify-start">
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
@@ -142,8 +142,8 @@ export default function ForgotPassword() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex justify-center text-center border-t border-slate-50 bg-slate-50/30">
-            <p className="text-xs text-slate-500 font-semibold">
+          <CardFooter className="flex justify-center text-center border-t border-slate-50 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/50">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
               Remember your password?{' '}
               <Link to="/login" className="text-brand-primary hover:text-teal-800 font-bold transition-colors">
                 Log in

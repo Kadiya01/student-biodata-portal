@@ -78,12 +78,12 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center items-center px-4 py-8">
+    <div className="min-h-[85vh] flex flex-col justify-center items-center px-4 py-8 bg-brand-bg dark:bg-slate-900">
       {/* Back button */}
       <div className="w-full max-w-md mb-4 flex justify-start">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
@@ -182,8 +182,8 @@ export default function Register() {
                   </form>
                 </CardContent>
 
-                <CardFooter className="flex justify-center text-center border-t border-slate-50 bg-slate-50/30">
-                  <p className="text-xs text-slate-500 font-semibold">
+                <CardFooter className="flex justify-center text-center border-t border-slate-50 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/50">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
                     Already registered?{' '}
                     <Link to="/login" className="text-brand-primary hover:text-teal-800 font-bold transition-colors">
                       Log in here
@@ -216,10 +216,10 @@ export default function Register() {
 
                 <CardContent className="p-8 text-center space-y-6">
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500 block">
                       Generated Registration Number
                     </span>
-                    <div className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-100 py-3.5 px-5 rounded-2xl">
+                    <div className="flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 py-3.5 px-5 rounded-2xl">
                       <span className="text-xl font-black text-teal-800 tracking-wider font-mono">
                         {successData.regNumber}
                       </span>
@@ -233,7 +233,7 @@ export default function Register() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                     Please keep this registration number safe. You must log in using your registered credentials to complete your biodata wizard and print your official sheet.
                   </p>
 

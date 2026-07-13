@@ -20,7 +20,7 @@ const ChangePassword = lazy(() => import('../pages/ChangePassword'));
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="bg-brand-bg dark:bg-slate-900 flex items-center justify-center min-h-[60vh]">
       <div className="space-y-4 w-full max-w-md">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-32" />

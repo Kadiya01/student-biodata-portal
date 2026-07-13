@@ -51,12 +51,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8">
+    <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-8 bg-brand-bg dark:bg-slate-900">
       {/* Back button */}
       <div className="w-full max-w-md mb-4 flex justify-start">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
@@ -118,14 +118,14 @@ export default function Login() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 text-center border-t border-slate-50 bg-slate-50/30">
-            <p className="text-xs text-slate-500 font-semibold">
+          <CardFooter className="flex flex-col gap-3 text-center border-t border-slate-50 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/50">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
               New student?{' '}
               <Link to="/register" className="text-brand-primary hover:text-teal-800 font-bold transition-colors">
                 Create account now
               </Link>
             </p>
-            <p className="text-[10px] text-slate-400 font-medium">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
               Are you a staff member?{' '}
               <Link to="/admin-login" className="text-slate-600 hover:text-slate-900 underline font-semibold transition-colors">
                 Access Staff Portal
