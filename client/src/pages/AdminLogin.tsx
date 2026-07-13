@@ -98,9 +98,9 @@ export default function AdminLogin() {
               />
 
               <div className="text-right">
-                <a href="#forgot" className="text-xs font-bold text-brand-accent hover:text-amber-600 transition-colors">
+                <Link to="/forgot-password" className="text-xs font-bold text-brand-accent hover:text-amber-600 transition-colors">
                   Forgot Password?
-                </a>
+                </Link>
               </div>
 
               <Button

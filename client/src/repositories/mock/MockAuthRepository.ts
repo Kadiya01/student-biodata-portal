@@ -121,4 +121,14 @@ export class MockAuthRepository implements IAuthRepository {
     }
     return { user: currentUser };
   }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    await delay(400);
+    return { message: 'If an account exists, a reset link has been sent to your email.' };
+  }
+
+  async resetPassword(_token: string, _password: string): Promise<{ message: string }> {
+    await delay(400);
+    return { message: 'Password reset successful' };
+  }
 }

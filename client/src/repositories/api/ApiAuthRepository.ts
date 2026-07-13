@@ -22,4 +22,14 @@ export class ApiAuthRepository implements IAuthRepository {
     const res = await api.get('/auth/me');
     return { user: res.data.user };
   }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const res = await api.post('/auth/forgot-password', { email });
+    return { message: res.data.message };
+  }
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    const res = await api.post('/auth/reset-password', { token, password });
+    return { message: res.data.message };
+  }
 }

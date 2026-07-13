@@ -26,4 +26,6 @@ export interface IAuthRepository {
   login(email: string, password: string): Promise<AuthResult>;
   register(payload: RegisterPayload): Promise<RegisterResult>;
   getMe(): Promise<{ user: User }>;
+  forgotPassword(email: string): Promise<{ message: string }>;
+  resetPassword(token: string, password: string): Promise<{ message: string }>;
 }

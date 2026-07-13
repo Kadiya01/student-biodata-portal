@@ -4,6 +4,8 @@ import Landing from '../pages/Landing';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import AdminLogin from '../pages/AdminLogin';
+import ForgotPassword from '../pages/ForgotPassword';
+import ResetPassword from '../pages/ResetPassword';
 import StudentDashboard from '../pages/StudentDashboard';
 import BiodataWizard from '../pages/BiodataWizard';
 import SubmissionStatus from '../pages/SubmissionStatus';
@@ -24,6 +26,8 @@ export default function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Student Routes */}
           <Route
