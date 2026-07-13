@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
 import * as authService from '../services/authService';
 import * as auditService from '../services/auditService';
 import { catchAsync } from '../middleware/catchAsync';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import prisma from '../prismaClient';
 
 export const register = catchAsync(async (req: Request, res: Response) => {
   const { user, token, refreshToken, regNumber } = await authService.registerUser(req.body);
@@ -54,4 +56,25 @@ export const logout = catchAsync(async (req: AuthenticatedRequest, res: Response
     await authService.logoutUser(refreshToken);
   }
   res.json({ success: true });
+});
+
+export const changePassword = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!req.user?.userId) return res.status(401).json({ error: 'Unauthorized' });
+  
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!ok) return res.status(400).json({ error: 'Current password is incorrect' });
+  
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  
+  await auditService.log({
+    userId: user.id, action: 'change_password', entityType: 'User', entityId: user.id,
+    details: { email: user.email }, ipAddress: req.ip
+  });
+  
+  res.json({ message: 'Password changed successfully' });
 });

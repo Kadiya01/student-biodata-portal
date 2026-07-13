@@ -32,4 +32,9 @@ export class ApiAuthRepository implements IAuthRepository {
     const res = await api.post('/auth/reset-password', { token, password });
     return { message: res.data.message };
   }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const res = await api.post('/auth/change-password', { currentPassword, newPassword });
+    return { message: res.data.message };
+  }
 }

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as studentService from '../services/studentService';
 import * as auditService from '../services/auditService';
 import * as notificationService from '../services/notificationService';
+import { sendStatusNotification } from '../services/emailService';
 import { catchAsync, parsePagination } from '../middleware/catchAsync';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
@@ -63,6 +64,9 @@ export const markUnderReview = catchAsync(async (req: AuthenticatedRequest, res:
   const profile = await studentService.setStudentStatus(
     req.params.id, 'under_review', undefined, req.user?.userId
   );
+  if (profile.user?.email) {
+    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'under review');
+  }
   res.json({ profile });
 });
 
@@ -86,6 +90,9 @@ export const approve = catchAsync(async (req: AuthenticatedRequest, res: Respons
       message: 'Your biodata submission has been approved.'
     });
   }
+  if (profile.user?.email) {
+    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'approved', reviewerComments);
+  }
   res.json({ profile });
 });
 
@@ -108,6 +115,9 @@ export const reject = catchAsync(async (req: AuthenticatedRequest, res: Response
       title: 'Submission Rejected',
       message: `Your biodata submission was rejected. Comment: ${reviewerComments || 'None'}`
     });
+  }
+  if (profile.user?.email) {
+    sendStatusNotification(profile.user.email, profile.fullName || 'Student', 'rejected', reviewerComments);
   }
   res.json({ profile });
 });

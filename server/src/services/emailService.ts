@@ -75,6 +75,32 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   }
 }
 
+export async function sendStatusNotification(
+  to: string,
+  studentName: string,
+  status: string,
+  comments?: string
+): Promise<void> {
+  const subject = `Biodata ${status} - ${studentName}`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #0d9488; color: white; padding: 20px; text-align: center;">
+        <h2>Rauda College of Health Science and Technology</h2>
+      </div>
+      <div style="padding: 20px; background: #f8fafc;">
+        <h3>Biodata ${status.charAt(0).toUpperCase() + status.slice(1)}</h3>
+        <p>Dear <strong>${studentName}</strong>,</p>
+        <p>Your biodata submission has been <strong>${status}</strong> by the review team.</p>
+        ${comments ? `<p><strong>Reviewer Comments:</strong> ${comments}</p>` : ''}
+        <p>Please log in to the portal for more details.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #94a3b8;">This is an automated message from the Student Biodata Portal.</p>
+      </div>
+    </div>
+  `;
+  await sendEmail({ to, subject, html });
+}
+
 export async function sendPasswordResetEmail(to: string, token: string): Promise<void> {
   const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 

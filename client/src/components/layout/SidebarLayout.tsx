@@ -14,7 +14,8 @@ import {
   Users,
   Settings,
   ShieldCheck,
-  GraduationCap
+  GraduationCap,
+  Lock
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { adminRepo } from '../../repositories';
@@ -70,11 +71,13 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
         { label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/student' },
         { label: 'Biodata Form', icon: <FileText className="w-5 h-5" />, path: '/student/biodata' },
         { label: 'Submission Status', icon: <Activity className="w-5 h-5" />, path: '/student/status' },
+        { label: 'Change Password', icon: <Lock className="w-5 h-5" />, path: '/change-password' },
       ];
     } else {
       // Reviewer and Super Admin share /admin main routing
       return [
         { label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/admin' },
+        { label: 'Change Password', icon: <Lock className="w-5 h-5" />, path: '/change-password' },
       ];
     }
   };

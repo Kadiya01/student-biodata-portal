@@ -131,4 +131,9 @@ export class MockAuthRepository implements IAuthRepository {
     await delay(400);
     return { message: 'Password reset successful' };
   }
+
+  async changePassword(_currentPassword: string, _newPassword: string): Promise<{ message: string }> {
+    await delay(400);
+    return { message: 'Password changed successfully' };
+  }
 }

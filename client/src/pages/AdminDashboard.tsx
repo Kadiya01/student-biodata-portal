@@ -33,6 +33,7 @@ import { Programme, AuditLogEntry } from '../repositories/IAdminRepository';
 import { generateRegistrationPDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { Submission, User, NotificationItem } from '../api/mockDb';
+import { Pagination } from '../components/ui/Pagination';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -81,6 +82,10 @@ export default function AdminDashboard() {
 
   // Delete confirmation
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   // Fetch all initial data
   const fetchData = async () => {
@@ -139,6 +144,7 @@ export default function AdminDashboard() {
     }
 
     setFilteredSubmissions(result);
+    setCurrentPage(1);
   }, [searchQuery, statusFilter, submissions]);
 
   // Statistics calculation
@@ -162,6 +168,10 @@ export default function AdminDashboard() {
 
   const reviewerStats = getReviewerStats();
   const adminStats = getAdminStats();
+
+  // Pagination
+  const totalPages = Math.ceil(filteredSubmissions.length / PAGE_SIZE);
+  const paginatedSubmissions = filteredSubmissions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   // Review Submissions Action handlers
   const handleOpenReview = (sub: Submission) => {
@@ -575,7 +585,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                    {filteredSubmissions.map((sub) => (
+                    {paginatedSubmissions.map((sub) => (
                       <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-4 font-black font-mono text-teal-800 tracking-wider">
                           {sub.regNumber}
@@ -619,6 +629,11 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {filteredSubmissions.length > PAGE_SIZE && (
+              <div className="px-4 py-3 border-t border-slate-100">
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               </div>
             )}
           </CardContent>

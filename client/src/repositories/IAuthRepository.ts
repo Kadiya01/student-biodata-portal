@@ -28,4 +28,5 @@ export interface IAuthRepository {
   getMe(): Promise<{ user: User }>;
   forgotPassword(email: string): Promise<{ message: string; resetLink?: string }>;
   resetPassword(token: string, password: string): Promise<{ message: string }>;
+  changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }>;
 }
