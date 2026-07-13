@@ -319,357 +319,299 @@ export default function AdminDashboard() {
     <SidebarLayout>
       <div className="space-y-8">
         
-        {/* REVIEWER VIEW */}
-        {!isSuperAdmin && (
-          <>
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Reviewer Portal</h1>
-                <p className="text-xs text-slate-500 mt-1">Review student qualifications, verify SSCE credits, and approve clearances.</p>
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button
-                  onClick={handleExportCSV}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 sm:flex-none border-slate-300 text-slate-700 hover:bg-slate-50"
-                  leftIcon={<Download className="w-4 h-4" />}
-                >
-                  Export CSV
-                </Button>
-                <Button
-                  onClick={handleExportPDF}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 sm:flex-none border-slate-300 text-slate-700 hover:bg-slate-50"
-                  leftIcon={<Download className="w-4 h-4" />}
-                >
-                  Export PDF Booklet
-                </Button>
-              </div>
-            </div>
-
-            {/* Statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Students</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{reviewerStats.total}</h3>
-                  </div>
-                  <div className="p-3 bg-teal-50 rounded-xl text-brand-primary shrink-0">
-                    <Users className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pending Review</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{reviewerStats.pending}</h3>
-                  </div>
-                  <div className="p-3 bg-amber-50 rounded-xl text-brand-accent shrink-0">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Approved Records</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{reviewerStats.approved}</h3>
-                  </div>
-                  <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 shrink-0">
-                    <FileCheck className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Rejected Records</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{reviewerStats.rejected}</h3>
-                  </div>
-                  <div className="p-3 bg-rose-50 rounded-xl text-rose-600 shrink-0">
-                    <AlertTriangle className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Submissions Search Table */}
-            <Card className="border-slate-100 overflow-hidden">
-              <CardHeader className="bg-slate-50/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <CardTitle>Enrollment Submissions</CardTitle>
-                  <CardDescription>Search and filter submissions to review</CardDescription>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                  <Input
-                    placeholder="Search by name, ID..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    leftIcon={<Search className="w-4 h-4 text-slate-400" />}
-                    className="py-2.5"
-                  />
-                  <Select
-                    options={[
-                      { label: 'All Statuses', value: '' },
-                      { label: 'Submitted', value: 'Submitted' },
-                      { label: 'Under Review', value: 'Under Review' },
-                      { label: 'Approved', value: 'Approved' },
-                      { label: 'Rejected', value: 'Rejected' },
-                    ]}
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="py-2.5 sm:w-44"
-                  />
-                </div>
-              </CardHeader>
-              
-              <CardContent className="p-0">
-                {filteredSubmissions.length === 0 ? (
-                  <div className="p-8">
-                    <EmptyState
-                      title="No Student Submissions Found"
-                      description="Try adjusting your search query or filters to find records."
-                    />
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table id="submissions-table" className="w-full text-left text-sm divide-y divide-slate-100">
-                      <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
-                        <tr>
-                          <th className="p-4">Reg Number</th>
-                          <th className="p-4">Student Name</th>
-                          <th className="p-4">Program Group</th>
-                          <th className="p-4">Submission Date</th>
-                          <th className="p-4">Status</th>
-                          <th className="p-4 text-center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                        {filteredSubmissions.map((sub) => (
-                          <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="p-4 font-black font-mono text-teal-800 tracking-wider">
-                              {sub.regNumber}
-                            </td>
-                            <td className="p-4 font-bold text-slate-900">{sub.fullName}</td>
-                            <td className="p-4 text-xs">{sub.programme}</td>
-                            <td className="p-4 text-xs font-sans">
-                              {new Date(sub.submissionDate).toLocaleDateString()}
-                            </td>
-                            <td className="p-4">{getStatusBadge(sub.status)}</td>
-                            <td className="p-4 flex justify-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="px-2 py-1 text-xs"
-                                leftIcon={<Eye className="w-3.5 h-3.5" />}
-                                onClick={() => handleOpenReview(sub)}
-                              >
-                                View Details
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="px-2 py-1 text-slate-400 hover:text-teal-700 hover:bg-teal-50"
-                                onClick={() => handleExportSinglePDF(sub.fullName)}
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
-
-        {/* SUPER ADMIN VIEW */}
-        {isSuperAdmin && (
-          <>
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Super Admin Dashboard</h1>
-                <p className="text-xs text-slate-500 mt-1">Manage portal reviewers, track enrollment volume, and review real-time alerts logs.</p>
-              </div>
+        {/* HEADER — visible to both roles */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+              {isSuperAdmin ? 'Super Admin Dashboard' : 'Reviewer Portal'}
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              {isSuperAdmin
+                ? 'Review student submissions, manage reviewers, and track enrollment activity.'
+                : 'Review student qualifications, verify SSCE credits, and approve clearances.'}
+            </p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+            <Button
+              onClick={handleExportCSV}
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none border-slate-300 text-slate-700 hover:bg-slate-50"
+              leftIcon={<Download className="w-4 h-4" />}
+            >
+              Export CSV
+            </Button>
+            <Button
+              onClick={handleExportPDF}
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none border-slate-300 text-slate-700 hover:bg-slate-50"
+              leftIcon={<Download className="w-4 h-4" />}
+            >
+              Export PDF Booklet
+            </Button>
+            {isSuperAdmin && (
               <Button
                 onClick={handleOpenAddReviewer}
                 leftIcon={<Plus className="w-4 h-4" />}
-                className="w-full sm:w-auto shadow-premium"
+                size="sm"
+                className="flex-1 sm:flex-none shadow-premium"
               >
-                Add Reviewer Account
+                Add Reviewer
               </Button>
+            )}
+          </div>
+        </div>
+
+        {/* STATISTICS — visible to both roles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card hoverable>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{isSuperAdmin ? 'Total Enrolled' : 'Total Students'}</p>
+                <h3 className="text-2xl font-black text-slate-800 mt-1">{reviewerStats.total}</h3>
+              </div>
+              <div className="p-3 bg-teal-50 rounded-xl text-brand-primary shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card hoverable>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{isSuperAdmin ? 'New Registrations' : 'Pending Review'}</p>
+                <h3 className="text-2xl font-black text-slate-800 mt-1">{isSuperAdmin ? adminStats.newRegs : reviewerStats.pending}</h3>
+              </div>
+              <div className="p-3 bg-amber-50 rounded-xl text-brand-accent shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card hoverable>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{isSuperAdmin ? 'Pending Reviews' : 'Approved Records'}</p>
+                <h3 className="text-2xl font-black text-slate-800 mt-1">{isSuperAdmin ? adminStats.pending : reviewerStats.approved}</h3>
+              </div>
+              <div className="p-3 bg-sky-50 rounded-xl text-sky-600 shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card hoverable>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{isSuperAdmin ? 'Approved Records' : 'Rejected Records'}</p>
+                <h3 className="text-2xl font-black text-slate-800 mt-1">{isSuperAdmin ? adminStats.approved : reviewerStats.rejected}</h3>
+              </div>
+              <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 shrink-0">
+                <FileCheck className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* SUBMISSIONS TABLE — visible to both roles */}
+        <Card className="border-slate-100 overflow-hidden">
+          <CardHeader className="bg-slate-50/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <CardTitle>Enrollment Submissions</CardTitle>
+              <CardDescription>Search and filter submissions to review</CardDescription>
             </div>
-
-            {/* Statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Enrolled</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{adminStats.total}</h3>
-                  </div>
-                  <div className="p-3 bg-teal-50 rounded-xl text-brand-primary shrink-0">
-                    <Users className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">New Registrations</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{adminStats.newRegs}</h3>
-                  </div>
-                  <div className="p-3 bg-amber-50 rounded-xl text-brand-accent shrink-0">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pending Reviews</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{adminStats.pending}</h3>
-                  </div>
-                  <div className="p-3 bg-sky-50 rounded-xl text-sky-600 shrink-0">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card hoverable>
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Approved Records</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">{adminStats.approved}</h3>
-                  </div>
-                  <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 shrink-0">
-                    <FileCheck className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <Input
+                placeholder="Search by name, ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                leftIcon={<Search className="w-4 h-4 text-slate-400" />}
+                className="py-2.5"
+              />
+              <Select
+                options={[
+                  { label: 'All Statuses', value: '' },
+                  { label: 'Submitted', value: 'Submitted' },
+                  { label: 'Under Review', value: 'Under Review' },
+                  { label: 'Approved', value: 'Approved' },
+                  { label: 'Rejected', value: 'Rejected' },
+                ]}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="py-2.5 sm:w-44"
+              />
             </div>
+          </CardHeader>
+          
+          <CardContent className="p-0">
+            {filteredSubmissions.length === 0 ? (
+              <div className="p-8">
+                <EmptyState
+                  title="No Student Submissions Found"
+                  description="Try adjusting your search query or filters to find records."
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table id="submissions-table" className="w-full text-left text-sm divide-y divide-slate-100">
+                  <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
+                    <tr>
+                      <th className="p-4">Reg Number</th>
+                      <th className="p-4">Student Name</th>
+                      <th className="p-4">Program Group</th>
+                      <th className="p-4">Submission Date</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                    {filteredSubmissions.map((sub) => (
+                      <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-black font-mono text-teal-800 tracking-wider">
+                          {sub.regNumber}
+                        </td>
+                        <td className="p-4 font-bold text-slate-900">{sub.fullName}</td>
+                        <td className="p-4 text-xs">{sub.programme}</td>
+                        <td className="p-4 text-xs font-sans">
+                          {new Date(sub.submissionDate).toLocaleDateString()}
+                        </td>
+                        <td className="p-4">{getStatusBadge(sub.status)}</td>
+                        <td className="p-4 flex justify-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="px-2 py-1 text-xs"
+                            leftIcon={<Eye className="w-3.5 h-3.5" />}
+                            onClick={() => handleOpenReview(sub)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="px-2 py-1 text-slate-400 hover:text-teal-700 hover:bg-teal-50"
+                            onClick={() => handleExportSinglePDF(sub.fullName)}
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            {/* Mid Panels: Real-time Notifications log & Reviewers List */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
-              {/* Reviewers Management List */}
-              <div className="lg:col-span-2 space-y-4">
-                <Card className="border border-slate-100 overflow-hidden">
-                  <CardHeader className="bg-slate-50/50 p-6 flex justify-between items-center">
-                    <div>
-                      <CardTitle>Reviewers Account Registry</CardTitle>
-                      <CardDescription>Authorize, edit, or toggle reviewer credentials</CardDescription>
+        {/* SUPER ADMIN ONLY: Reviewer Management + Alerts */}
+        {isSuperAdmin && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Reviewers Management List */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card className="border border-slate-100 overflow-hidden">
+                <CardHeader className="bg-slate-50/50 p-6 flex justify-between items-center">
+                  <div>
+                    <CardTitle>Reviewers Account Registry</CardTitle>
+                    <CardDescription>Authorize, edit, or toggle reviewer credentials</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {reviewers.length === 0 ? (
+                    <div className="p-8">
+                      <EmptyState title="No Reviewers Registered" description="Click the button in header to add a reviewer." />
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    {reviewers.length === 0 ? (
-                      <div className="p-8">
-                        <EmptyState title="No Reviewers Registered" description="Click the button in header to add a reviewer." />
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm divide-y divide-slate-100">
-                          <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
-                            <tr>
-                              <th className="p-4">Name</th>
-                              <th className="p-4">Email</th>
-                              <th className="p-4">Account Status</th>
-                              <th className="p-4 text-center">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 text-slate-700 font-semibold">
-                            {reviewers.map((rev) => (
-                              <tr key={rev.id} className="hover:bg-slate-50/30 transition-colors">
-                                <td className="p-4 text-slate-900 font-bold">
-                                  {rev.firstName ? `${rev.firstName} ${rev.lastName || ''}`.trim() : 'Unnamed'}
-                                </td>
-                                <td className="p-4 text-xs font-sans text-slate-500">{rev.email}</td>
-                                <td className="p-4">
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm divide-y divide-slate-100">
+                        <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase">
+                          <tr>
+                            <th className="p-4">Name</th>
+                            <th className="p-4">Email</th>
+                            <th className="p-4">Account Status</th>
+                            <th className="p-4 text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-700 font-semibold">
+                          {reviewers.map((rev) => (
+                            <tr key={rev.id} className="hover:bg-slate-50/30 transition-colors">
+                              <td className="p-4 text-slate-900 font-bold">
+                                {rev.firstName ? `${rev.firstName} ${rev.lastName || ''}`.trim() : 'Unnamed'}
+                              </td>
+                              <td className="p-4 text-xs font-sans text-slate-500">{rev.email}</td>
+                              <td className="p-4">
+                                {rev.status === 'active' ? (
+                                  <Badge variant="success">Active</Badge>
+                                ) : (
+                                  <Badge variant="error">Deactivated</Badge>
+                                )}
+                              </td>
+                              <td className="p-4 flex justify-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="p-2"
+                                  onClick={() => handleOpenEditReviewer(rev)}
+                                >
+                                  <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant={rev.status === 'active' ? 'danger' : 'secondary'}
+                                  className="px-2.5 py-1 text-xs"
+                                  onClick={() => handleToggleReviewer(rev.id, rev.firstName || '')}
+                                >
                                   {rev.status === 'active' ? (
-                                    <Badge variant="success">Active</Badge>
+                                    <span className="flex items-center gap-1"><UserMinus className="w-3.5 h-3.5" /> Deactivate</span>
                                   ) : (
-                                    <Badge variant="error">Deactivated</Badge>
+                                    <span className="flex items-center gap-1"><UserCheck className="w-3.5 h-3.5" /> Activate</span>
                                   )}
-                                </td>
-                                <td className="p-4 flex justify-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="p-2"
-                                    onClick={() => handleOpenEditReviewer(rev)}
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5 text-slate-500" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant={rev.status === 'active' ? 'danger' : 'secondary'}
-                                    className="px-2.5 py-1 text-xs"
-                                    onClick={() => handleToggleReviewer(rev.id, rev.firstName || '')}
-                                  >
-                                    {rev.status === 'active' ? (
-                                      <span className="flex items-center gap-1"><UserMinus className="w-3.5 h-3.5" /> Deactivate</span>
-                                    ) : (
-                                      <span className="flex items-center gap-1"><UserCheck className="w-3.5 h-3.5" /> Activate</span>
-                                    )}
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Notification Logs */}
-              <div className="space-y-4">
-                <Card className="border border-slate-100 overflow-hidden h-full flex flex-col">
-                  <CardHeader className="bg-slate-50/50 p-6 shrink-0 flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-brand-primary" /> Live Alerts Log
-                      </CardTitle>
-                      <CardDescription>Real-time audit log of student registrations</CardDescription>
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-4 overflow-y-auto divide-y divide-slate-50 max-h-[380px] flex-grow">
-                    {systemNotifications.length === 0 ? (
-                      <div className="text-center py-12 text-slate-400 text-xs font-semibold">
-                        No system logs found
-                      </div>
-                    ) : (
-                      systemNotifications.map((n) => (
-                        <div key={n.id} className="py-3 flex flex-col gap-1 text-xs">
-                          <span className="font-bold text-slate-800">{n.title}</span>
-                          <span className="text-slate-500 leading-normal">{n.message}</span>
-                          <span className="text-[9px] text-slate-400 font-medium font-sans">
-                            {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(n.timestamp).toLocaleDateString()}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </>
+
+            {/* Notification Logs */}
+            <div className="space-y-4">
+              <Card className="border border-slate-100 overflow-hidden h-full flex flex-col">
+                <CardHeader className="bg-slate-50/50 p-6 shrink-0 flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-brand-primary" /> Live Alerts Log
+                    </CardTitle>
+                    <CardDescription>Real-time audit log of student registrations</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 overflow-y-auto divide-y divide-slate-50 max-h-[380px] flex-grow">
+                  {systemNotifications.length === 0 ? (
+                    <div className="text-center py-12 text-slate-400 text-xs font-semibold">
+                      No system logs found
+                    </div>
+                  ) : (
+                    systemNotifications.map((n) => (
+                      <div key={n.id} className="py-3 flex flex-col gap-1 text-xs">
+                        <span className="font-bold text-slate-800">{n.title}</span>
+                        <span className="text-slate-500 leading-normal">{n.message}</span>
+                        <span className="text-[9px] text-slate-400 font-medium font-sans">
+                          {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(n.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+          </div>
         )}
 
         {/* DETAILS/REVIEW STUDENT MODAL */}
