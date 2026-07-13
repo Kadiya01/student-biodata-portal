@@ -36,7 +36,13 @@ export function mapSubmission(sub: any): any {
     programme: typeof programme === 'string' ? programme : (programme.name || ''),
     submissionDate: sub.createdAt,
     status: normalizeStatus(sub.status),
-    biodata: bio,
+    biodata: {
+      ...bio,
+      dob: bio.dob || sub.dob || '',
+      gender: bio.gender || sub.gender || '',
+      phone: bio.phone || sub.contactPhone || '',
+      address: bio.address || sub.address || '',
+    },
     reviewerComments: sub.reviewerComments || undefined,
   };
 }

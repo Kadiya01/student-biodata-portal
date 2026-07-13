@@ -45,6 +45,7 @@ export async function createOrUpdateStudent(data: any) {
   if (profile.gender !== undefined) mapped.gender = profile.gender;
   if (profile.address !== undefined) mapped.address = profile.address;
   if (profile.contactPhone !== undefined) mapped.contactPhone = profile.contactPhone;
+  if (profile.contactPhone === undefined && profile.phone !== undefined) mapped.contactPhone = profile.phone;
   if (profile.programmeId !== undefined) {
     if (profile.programmeId) {
       const programme = await prisma.programme.findUnique({ where: { id: profile.programmeId } });
@@ -57,7 +58,7 @@ export async function createOrUpdateStudent(data: any) {
   if (profile.reviewerComments !== undefined) mapped.reviewerComments = profile.reviewerComments;
 
   const wizardFields: any = {};
-  const wizardKeys = ['passportPhoto', 'fullName', 'primarySchool', 'secondarySchool', 'ssceType', 'ssceSubjects', 'creditsCount', 'isEligible', 'guardianName', 'guardianAddress', 'guardianPhone', 'guardianRelationship', 'email', 'lastUpdated', 'programmeId'];
+  const wizardKeys = ['passportPhoto', 'fullName', 'dob', 'gender', 'phone', 'address', 'primarySchool', 'secondarySchool', 'ssceType', 'ssceSubjects', 'creditsCount', 'isEligible', 'guardianName', 'guardianAddress', 'guardianPhone', 'guardianRelationship', 'email', 'lastUpdated', 'programmeId'];
   for (const key of wizardKeys) {
     if (profile[key] !== undefined) wizardFields[key] = profile[key];
   }
