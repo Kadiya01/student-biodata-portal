@@ -23,9 +23,9 @@ export class ApiAuthRepository implements IAuthRepository {
     return { user: res.data.user };
   }
 
-  async forgotPassword(email: string): Promise<{ message: string }> {
+  async forgotPassword(email: string): Promise<{ message: string; resetLink?: string }> {
     const res = await api.post('/auth/forgot-password', { email });
-    return { message: res.data.message };
+    return { message: res.data.message, resetLink: res.data.resetLink };
   }
 
   async resetPassword(token: string, password: string): Promise<{ message: string }> {

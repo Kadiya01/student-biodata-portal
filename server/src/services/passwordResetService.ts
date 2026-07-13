@@ -29,6 +29,17 @@ export async function requestPasswordReset(email: string) {
     });
   });
 
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const resetLink = `${clientUrl}/reset-password?token=${token}`;
+
+  // If SMTP is not configured, include the reset link in the response for dev/testing
+  if (!process.env.SMTP_HOST) {
+    return {
+      message: 'If an account exists, a reset link has been sent to your email.',
+      resetLink,
+    };
+  }
+
   return { message: 'If an account exists, a reset link has been sent to your email.' };
 }
 

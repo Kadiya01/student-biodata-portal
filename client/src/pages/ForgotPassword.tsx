@@ -19,6 +19,7 @@ type ForgotFormValues = z.infer<typeof forgotSchema>;
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [resetLink, setResetLink] = useState<string | null>(null);
 
   const {
     register,
@@ -32,7 +33,8 @@ export default function ForgotPassword() {
   const onSubmit = async (data: ForgotFormValues) => {
     setLoading(true);
     try {
-      await authRepo.forgotPassword(data.email);
+      const result = await authRepo.forgotPassword(data.email);
+      setResetLink((result as any).resetLink || null);
       setSent(true);
     } catch {
       setSent(true);
@@ -64,9 +66,20 @@ export default function ForgotPassword() {
                 <CheckCircle className="w-6 h-6" />
               </div>
               <h2 className="text-xl font-extrabold text-slate-900 mb-2">Check Your Email</h2>
-              <p className="text-sm text-slate-500 mb-6">
+              <p className="text-sm text-slate-500 mb-4">
                 If an account exists with that email, a password reset link has been sent.
               </p>
+              {resetLink && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-left">
+                  <p className="text-xs font-bold text-amber-700 mb-1">Dev Mode — Reset Link:</p>
+                  <a
+                    href={resetLink}
+                    className="text-xs text-amber-900 underline break-all font-medium"
+                  >
+                    {resetLink}
+                  </a>
+                </div>
+              )}
               <Link to="/login">
                 <Button className="w-full" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Return to Login
