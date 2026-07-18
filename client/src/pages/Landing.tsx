@@ -10,7 +10,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <main className="min-h-[85vh] flex flex-col justify-center py-6 md:py-12 bg-brand-bg dark:bg-slate-900">
+    <main className="min-h-[85vh] flex flex-col justify-center py-6 md:py-12 px-4 bg-brand-bg dark:bg-slate-900">
       {/* Top bar */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
@@ -30,7 +30,7 @@ export default function Landing() {
       </div>
 
       {/* Main Portals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full mx-auto mt-12 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full mx-auto mt-12">
         {/* Student Portal Card */}
         <Card className="flex flex-col h-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-brand-secondary/40 transition-all duration-300 hover:shadow-premium dark:hover:shadow-dark-premium group">
           <CardContent className="p-8 flex flex-col flex-1">
@@ -89,7 +89,7 @@ export default function Landing() {
       </div>
 
       {/* Feature Bullet Highlights */}
-      <div className="max-w-4xl mx-auto mt-16 px-4">
+      <div className="max-w-4xl mx-auto mt-16">
         <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center mb-6">
           System Core Features
         </h3>
